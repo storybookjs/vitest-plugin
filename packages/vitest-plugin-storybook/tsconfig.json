@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "jsx": "react",
+    "lib": ["es2017", "dom"],
+    "module": "ESNext",
+    "noImplicitAny": true,
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "types": ["node"],
+    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "outDir": "dist",
+    "declaration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+  },
+  "include": ["src/**/*.ts"]
+}
