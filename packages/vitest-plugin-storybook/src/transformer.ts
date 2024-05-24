@@ -1,9 +1,14 @@
+import { readFile, writeFile } from 'fs/promises'
 import MagicString from 'magic-string'
+import { join } from 'path'
 import typescript from 'typescript'
+import { Options } from './types'
 
-// This function parses the source file to find all named exports.
-function findNamedExports(sourceFile: typescript.SourceFile): string[] {
-  const exportNames: string[] = []
+// This function parses the source file to find all named exports and their positions.
+function findNamedExports(
+  sourceFile: typescript.SourceFile
+): { name: string; pos: number }[] {
+  const exportNames: { name: string; pos: number }[] = []
 
   function visit(node: typescript.Node) {
     // Check if the node is a named export within an export declaration
@@ -13,7 +18,9 @@ function findNamedExports(sourceFile: typescript.SourceFile): string[] {
       typescript.isNamedExports(node.exportClause)
     ) {
       node.exportClause.elements.forEach((spec) => {
-        exportNames.push(spec.name.text)
+        if (spec.name) {
+          exportNames.push({ name: spec.name.text, pos: spec.name.getStart() })
+        }
       })
     }
 
@@ -32,11 +39,14 @@ function findNamedExports(sourceFile: typescript.SourceFile): string[] {
         if (typescript.isVariableStatement(node)) {
           node.declarationList.declarations.forEach((decl) => {
             if (typescript.isIdentifier(decl.name)) {
-              exportNames.push(decl.name.text)
+              exportNames.push({
+                name: decl.name.text,
+                pos: 10,
+              })
             }
           })
         } else if (node.name && typescript.isIdentifier(node.name)) {
-          exportNames.push(node.name.text)
+          exportNames.push({ name: node.name.text, pos: node.name.getStart() })
         }
       }
     }
@@ -50,9 +60,55 @@ function findNamedExports(sourceFile: typescript.SourceFile): string[] {
 }
 
 // Main transform function for the Vitest plugin
-export function transform(code: string, id: string) {
+export async function transform({
+  code,
+  id,
+  options,
+}: {
+  code: string
+  id: string
+  options: Options
+}) {
+  if (options.mode === 'storyshots') {
+    if (id.includes('storybook.test')) {
+      if (options.persistStoryshotsContent && code.includes('// @Persisted')) {
+        return code
+      }
+
+      const s = new MagicString(code)
+      const content = await readFile(
+        join(__dirname, './storyshots.template.mjs'),
+        'utf-8'
+      )
+      s.append(
+        content
+          .replace('{{shouldSnapshot}}', String(options.snapshot))
+          .replace('@storybook/react', String(options.storybookPackage))
+          .replace(
+            '@testing-library/react',
+            String(options.testingLibraryPackage)
+          )
+      )
+
+      if (options.persistStoryshotsContent) {
+        s.prepend('// @ts-nocheck\n')
+        s.prepend('// @Persisted\n')
+        await writeFile(id, s.toString())
+      }
+
+      return {
+        code: s.toString(),
+        map: s.generateMap({ hires: true, source: id }),
+      }
+    } else {
+      return code
+    }
+  }
+
   const isStoryFile = /\.stor(y|ies)\./.test(id)
-  if (!isStoryFile) return code
+  if (!isStoryFile) {
+    return code
+  }
   const node = typescript.createSourceFile(
     id,
     code,
@@ -73,14 +129,19 @@ export function transform(code: string, id: string) {
       ?.replace(/\.stories\.tsx?$/, '') || 'Component'
 
   const tests = exportNames
-    .map((name) => {
-      return [
+    .map(({ name, pos }) => {
+      const testCode = [
         `test('${name}', async () => {`,
         `  await ${name}Story.load();`,
         `  render(<${name}Story />);`,
         `  await ${name}Story.play?.();`,
         `});`,
       ].join('\n')
+
+      // Add source map location for the position of the export name
+      s.addSourcemapLocation(pos)
+
+      return testCode
     })
     .join('\n\n')
 
@@ -92,7 +153,7 @@ export function transform(code: string, id: string) {
       `import { describe, test } from 'vitest';\n` +
       `import { render } from '@testing-library/react';\n\n` +
       `const { ${exportNames
-        .map((v) => `${v}: ${v}Story`)
+        .map((v) => `${v.name}: ${v.name}Story`)
         .join(', ')} } = composeStories(stories);\n\n` +
       `describe('${componentName}', () => {\n${tests}\n});`
   )

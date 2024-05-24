@@ -5,11 +5,15 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [
     Inspect({ build: true, outputDir: '.vite-inspect' }),
-    storybookTest(),
+    storybookTest({
+      mode: 'stories',
+    }),
   ],
   test: {
+    browser: {
+      name: 'chrome',
+    },
     environment: 'jsdom',
     includeSource: ['./src/**/*.stories.[jt]sx?'],
-    include: ['./**/*.stories.tsx'],
   },
 })

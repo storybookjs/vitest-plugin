@@ -1,5 +1,4 @@
 {
-	"packageManager": "pnpm@9.0.6",
 	"scripts": {
 		"test": "pnpm -r test",
 		"fmt": "biome format --write . && biome lint --apply .",

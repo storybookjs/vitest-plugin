@@ -1,5 +1,5 @@
 {
-  "name": "vitest-plugin-storybook",
+	"name": "vitest-plugin-storybook",
 	"version": "1.0.0",
 	"description": "Vite plugin for story testing powered by Vitest",
 	"type": "commonjs",
@@ -11,7 +11,9 @@
 			"default": "./dist/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"keywords": [
 		"vite",
 		"plugin",
@@ -22,6 +24,7 @@
 	],
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs --dts",
+		"prebuild": "tsup src/storyshots.template.ts --format esm --external @storybook/react --external @testing-library/react --external vitest --target esnext --cjsInterop",
 		"check": "tsc --noEmit"
 	},
 	"repository": {
@@ -38,22 +41,23 @@
 		"vitest": ">=0.29.0"
 	},
 	"devDependencies": {
-    "@testing-library/jest-dom": "^6.4.5",
-    "@testing-library/react": "^15.0.7",
-    "@types/node": "^20.12.11",
-    "@types/testing-library__jest-dom": "^6.0.0",
-    "jsdom": "^24.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "ts-morph": "^22.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
+		"@storybook/react": "^8.1.0-beta.0",
+		"@testing-library/jest-dom": "^6.4.5",
+		"@testing-library/react": "^15.0.7",
+		"@types/node": "^20.12.11",
+		"@types/testing-library__jest-dom": "^6.0.0",
+		"jsdom": "^24.0.0",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"ts-morph": "^22.0.0",
+		"ts-node": "^10.9.2",
 		"tsup": "^8.0.1",
+		"typescript": "^5.4.5",
 		"vite": "^5.0.2",
-    "vitest": "^1.6.0"
+		"vitest": "^1.6.0"
 	},
 	"dependencies": {
-    "magic-string": "^0.30.10",
+		"magic-string": "^0.30.10",
 		"typescript": "^5.0.0"
 	}
 }
