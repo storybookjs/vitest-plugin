@@ -2,6 +2,7 @@ import type { Plugin } from 'vite'
 import { join } from 'path'
 import { transform } from './transformer'
 import { Options } from './types'
+import CustomReporter from './reporter'
 import { PACKAGES_MAP } from './utils'
 
 const defaultOptions: Options = {
@@ -11,8 +12,8 @@ const defaultOptions: Options = {
 }
 
 export const storybookTest = (options?: Partial<Options>): Plugin => {
-  const virtualModuleId = '/virtual:storybook-setup.js'
-  const resolvedVirtualModuleId = '\0' + virtualModuleId
+  const virtualSetupFileId = '/virtual:storybook-setup.js'
+  const resolvedVirtualSetupFileId = '\0' + virtualSetupFileId
   let storybookDirPath: string
 
   const finalOptions = { ...defaultOptions, ...options }
@@ -30,12 +31,12 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
       }
     },
     resolveId(id) {
-      if (id === virtualModuleId) {
-        return resolvedVirtualModuleId
+      if (id === virtualSetupFileId) {
+        return resolvedVirtualSetupFileId
       }
     },
     load(id) {
-      if (id === resolvedVirtualModuleId) {
+      if (id === resolvedVirtualSetupFileId) {
         const metadata = PACKAGES_MAP[finalOptions.renderer]
         return `
           import { afterEach, afterAll, vi } from 'vitest'
@@ -68,7 +69,7 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
         `
       }
     },
-    config(config: any) {
+    async config(config: any) {
       config.test = config.test ?? {}
       // add a prefix to the tests when in a workspace scenario
       if (config.workspaceConfigPath) {
@@ -82,10 +83,11 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
       config.test.include.push('**/*.{story,stories}.?(c|m)[jt]s?(x)')
 
       config.test.setupFiles = config.test.setupFiles || []
-      config.test.setupFiles.push(virtualModuleId)
+      config.test.setupFiles.push(virtualSetupFileId)
 
       config.test.reporters = config.test.reporters || []
-      // config.test.reporters.push('vitest-plugin-storybook/reporter.js')
+
+      config.test.reporters.push(new CustomReporter(finalOptions))
 
       return config
     },

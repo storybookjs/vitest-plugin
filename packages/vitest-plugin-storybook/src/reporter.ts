@@ -1,7 +1,13 @@
 import { Reporter } from 'vitest/reporters'
+import { Options } from './types'
 
 export default class CustomReporter implements Reporter {
-  onInit(ctx: any) {
-    ctx.provide('__storybook', { test: 123 })
+  options: Options
+  constructor(options: Options) {
+    this.options = options
+  }
+
+  onInit() {
+    // TODO: Start Storybook if needed
   }
 }
