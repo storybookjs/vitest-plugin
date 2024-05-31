@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { join } from 'path'
 import { transform } from './transformer'
 import { Options } from './types'
-import CustomReporter from './reporter'
+// import CustomReporter from './reporter'
 import { PACKAGES_MAP } from './utils'
 
 const defaultOptions: Options = {
@@ -87,7 +87,7 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
 
       config.test.reporters = config.test.reporters || []
 
-      config.test.reporters.push(new CustomReporter(finalOptions))
+      // config.test.reporters.push(new CustomReporter(finalOptions))
 
       return config
     },
