@@ -38,8 +38,7 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
       if (id === resolvedVirtualModuleId) {
         const metadata = PACKAGES_MAP[finalOptions.renderer]
         return `
-          console.log("from virtual module")
-          import { afterEach, vi } from 'vitest'
+          import { afterEach, afterAll, vi } from 'vitest'
           import { setProjectAnnotations } from '${metadata.storybookPackage}'
           import { cleanup } from '${metadata.testingLibraryPackage}'
 
@@ -47,6 +46,23 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
 
           afterEach(() => {
             cleanup()
+          })
+
+          const modifyErrorMessage = (task) => {
+            task.tasks.forEach((currentTask) => {
+              if (currentTask.type === 'test' && currentTask.result.state === 'fail') {
+                const currentError = currentTask.result.errors[0]
+                const storyUrl = 'http://localhost:6006/?path=/story/' + currentTask.meta.storyId
+                currentError.message = 
+                  '\\n\x1B[34m' + 
+                  'Click to debug the error directly in Storybook: ' + storyUrl + '\x1B[39m' + 
+                  '\\n\\n' + currentError.message
+              }
+            })
+          }
+
+          afterAll(suite => {
+            suite.tasks.forEach(modifyErrorMessage)
           })
           setProjectAnnotations(globalStorybookConfig)
         `
@@ -67,6 +83,9 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
 
       config.test.setupFiles = config.test.setupFiles || []
       config.test.setupFiles.push(virtualModuleId)
+
+      config.test.reporters = config.test.reporters || []
+      // config.test.reporters.push('vitest-plugin-storybook/reporter.js')
 
       return config
     },

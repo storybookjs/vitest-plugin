@@ -94,13 +94,15 @@ export async function transform({
 
   const tests = exportNames
     .map(({ name, pos }) => {
+      const composedStory = `${name}Story`
       const testCode = [
-        `test('${name}', async () => {`,
-        `  await ${name}Story.load();`,
+        `test('${name} [' + ${composedStory}.id + ']', async ({ task }) => {`,
+        `  task.meta.storyId = ${composedStory}.id;`,
+        `  await ${composedStory}.load();`,
         options.renderer === 'react'
-          ? `  render(<${name}Story />);`
-          : `  render(${name});`,
-        `  await ${name}Story.play?.();`,
+          ? `  render(<${composedStory} />);`
+          : `  render(${composedStory});`,
+        `  await ${composedStory}.play?.();`,
         `});`,
       ].join('\n')
 
