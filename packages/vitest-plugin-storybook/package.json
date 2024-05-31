@@ -24,7 +24,6 @@
 	],
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs --dts",
-		"prebuild": "tsup src/storyshots.template.ts --format esm --external @storybook/react --external @testing-library/react --external vitest --target esnext --cjsInterop",
 		"check": "tsc --noEmit"
 	},
 	"repository": {

@@ -1,7 +1,5 @@
 export type Options = {
-  mode?: 'storyshots' | 'stories'
-  storybookPackage?: '@storybook/react' | '@storybook/vue3'
-  testingLibraryPackage?: '@testing-library/react' | '@testing-library/vue'
+  configDir?: string
+  renderer: 'react' | 'vue3'
   snapshot?: boolean
-  persistStoryshotsContent?: boolean
 }

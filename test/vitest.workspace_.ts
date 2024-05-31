@@ -1,16 +1,15 @@
 import { storybookTest } from 'vitest-plugin-storybook'
 import Inspect from 'vite-plugin-inspect'
-import { defineConfig, mergeConfig } from 'vitest/config'
-import viteConfig from './vite.config'
+import { defineWorkspace } from 'vitest/config'
 
-export default mergeConfig(
-  viteConfig,
-  defineConfig({
+export default defineWorkspace([
+  {
+    extends: './vite.config.ts',
+  },
+  {
     plugins: [
       Inspect({ build: true, outputDir: '.vite-inspect' }),
-      storybookTest({
-        renderer: 'react',
-      }),
+      storybookTest(),
     ],
     test: {
       browser: {
@@ -19,5 +18,5 @@ export default mergeConfig(
       environment: 'jsdom',
       includeSource: ['./src/**/*.stories.[jt]sx?'],
     },
-  })
-)
+  },
+])
