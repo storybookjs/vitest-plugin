@@ -2,14 +2,20 @@
 	"name": "vitest-plugin-storybook",
 	"version": "1.0.0",
 	"description": "Vite plugin for story testing powered by Vitest",
-	"type": "commonjs",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"type": "module",
 	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
-		}
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./dist/index.cjs",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./reporter": {
+      "types": "./dist/reporter.d.ts",
+      "require": "./dist/reporter.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
 	},
 	"files": [
 		"dist"
@@ -23,7 +29,7 @@
 		"vitest"
 	],
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs --dts",
+		"build": "tsup",
 		"check": "tsc --noEmit"
 	},
 	"repository": {

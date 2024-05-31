@@ -13,12 +13,22 @@ const defaultOptions: Options = {
 export const storybookTest = (options?: Partial<Options>): Plugin => {
   const virtualModuleId = '/virtual:storybook-setup.js'
   const resolvedVirtualModuleId = '\0' + virtualModuleId
+  let storybookDirPath: string
 
   const finalOptions = { ...defaultOptions, ...options }
 
   return {
     name: 'vite-plugin-storybook-test',
     enforce: 'pre',
+    configResolved(config) {
+      if (!options?.configDir) {
+        // if you don't specify configDir, I'll try to find .storybook relative to the root
+        storybookDirPath = join(process.cwd(), finalOptions.configDir!)
+      } else {
+        // if you do specify configDir, I'll try to find relative to the config file
+        storybookDirPath = join(config.configFile!, finalOptions.configDir!)
+      }
+    },
     resolveId(id) {
       if (id === virtualModuleId) {
         return resolvedVirtualModuleId
@@ -33,10 +43,7 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
           import { setProjectAnnotations } from '${metadata.storybookPackage}'
           import { cleanup } from '${metadata.testingLibraryPackage}'
 
-          import globalStorybookConfig from '${join(
-            process.cwd(),
-            finalOptions.configDir || ''
-          )}/preview'
+          import globalStorybookConfig from '${storybookDirPath}/preview'
 
           afterEach(() => {
             cleanup()
