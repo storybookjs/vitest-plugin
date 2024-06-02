@@ -85,7 +85,6 @@ export async function transform({
 
   const s = new MagicString(code)
   const importPath = id.replace(/\.stories\.ts$/, '.stories')
-  const testFilePath = id.replace(/\.stories\.ts$/, '.test.ts')
   const componentName =
     id
       .split('/')
@@ -98,8 +97,9 @@ export async function transform({
     .map(({ name, pos }) => {
       const composedStory = `${name}Story`
       const testCode = [
-        `test('${name} [' + ${composedStory}.id + ']', async ({ task }) => {`,
+        `test('${name}', async ({ task }) => {`,
         `  task.meta.storyId = ${composedStory}.id;`,
+        `  task.meta.hasPlayFunction = !!${composedStory}.play;`,
         `  await ${composedStory}.load();`,
         `  ${metadata.render(composedStory)}`,
         `  await ${composedStory}.play?.();`,

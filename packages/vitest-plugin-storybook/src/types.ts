@@ -1,5 +1,6 @@
 export type Options = {
-  configDir?: string
+  configDir: string
+  storybookScript?: string
   renderer: 'react' | 'vue3' | 'svelte'
   snapshot?: boolean
 }

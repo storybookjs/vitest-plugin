@@ -2,10 +2,12 @@ import type { Plugin } from 'vite'
 import { join } from 'path'
 import { transform } from './transformer'
 import { Options } from './types'
-// import CustomReporter from './reporter'
+import { StorybookStatusReporter } from './storybook-status-reporter'
+import { StorybookCliReporter } from './storybook-cli-reporter'
 import { PACKAGES_MAP } from './utils'
 
 const defaultOptions: Options = {
+  storybookScript: 'yarn storybook',
   configDir: '.storybook',
   renderer: 'react',
   snapshot: false,
@@ -16,22 +18,19 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
   const resolvedVirtualSetupFileId = '\0' + virtualSetupFileId
   let storybookDirPath: string
 
-  const finalOptions = { ...defaultOptions, ...options }
+  // TODO: make this configurable
+  const storybookPort = 6006
+  // TARGET_URL is used in CI to point to a deployed Storybook URL
+  const storybookUrl =
+    process.env.TARGET_URL || `http://localhost:${storybookPort}`
+
+  const finalOptions = { ...defaultOptions, ...options } as Options
 
   return {
     name: 'vite-plugin-storybook-test',
     enforce: 'pre',
-    configResolved(config) {
-      if (!options?.configDir) {
-        // if you don't specify configDir, I'll try to find .storybook relative to the root
-        storybookDirPath = join(process.cwd(), finalOptions.configDir!)
-      } else {
-        // if you do specify configDir, I'll try to find relative to the config file
-        storybookDirPath = join(config.configFile!, finalOptions.configDir!)
-      }
-    },
     resolveId(id) {
-      if (id === virtualSetupFileId) {
+      if (id.startsWith(virtualSetupFileId)) {
         return resolvedVirtualSetupFileId
       }
     },
@@ -45,15 +44,14 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
 
           import globalStorybookConfig from '${storybookDirPath}/preview'
 
-          afterEach(() => {
-            cleanup()
-          })
-
           const modifyErrorMessage = (task) => {
             task.tasks.forEach((currentTask) => {
               if (currentTask.type === 'test' && currentTask.result.state === 'fail') {
                 const currentError = currentTask.result.errors[0]
-                const storyUrl = 'http://localhost:6006/?path=/story/' + currentTask.meta.storyId
+                let storyUrl = '${storybookUrl}/?path=/story/' + currentTask.meta.storyId
+                if (currentTask.meta.hasPlayFunction) {
+                  storyUrl = storyUrl + '&addonPanel=storybook/interactions/panel'
+                }
                 currentError.message = 
                   '\\n\x1B[34m' + 
                   'Click to debug the error directly in Storybook: ' + storyUrl + '\x1B[39m' + 
@@ -62,14 +60,26 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
             })
           }
 
+          afterEach(() => {
+            cleanup()
+          })
           afterAll(suite => {
             suite.tasks.forEach(modifyErrorMessage)
           })
+
           setProjectAnnotations(globalStorybookConfig)
         `
       }
     },
-    async config(config: any) {
+    async configResolved(config: any) {
+      if (!options?.configDir) {
+        // if you don't specify configDir, I'll try to find .storybook relative to the root
+        storybookDirPath = join(process.cwd(), finalOptions.configDir)
+      } else {
+        // if you do specify configDir, I'll try to find relative to the config file
+        storybookDirPath = join(config.configFile!, finalOptions.configDir)
+      }
+
       config.test = config.test ?? {}
       // add a prefix to the tests when in a workspace scenario
       if (config.workspaceConfigPath) {
@@ -79,15 +89,25 @@ export const storybookTest = (options?: Partial<Options>): Plugin => {
       config.test.isolate = config.test.isolate ?? false
       // enable globals so there's more compatibility with third party libraries e.g. vi-canvas-mock
       config.test.globals = config.test.globals ?? true
-      config.test.include = config.test.include || []
+
+      config.test.include = config.test.include ?? []
+      if (typeof config.test.include === 'string') {
+        config.test.include = [config.test.include]
+      }
       config.test.include.push('**/*.{story,stories}.?(c|m)[jt]s?(x)')
 
-      config.test.setupFiles = config.test.setupFiles || []
+      config.test.setupFiles = config.test.setupFiles ?? []
+      if (typeof config.test.setupFiles === 'string') {
+        config.test.setupFiles = [config.test.setupFiles]
+      }
       config.test.setupFiles.push(virtualSetupFileId)
 
-      config.test.reporters = config.test.reporters || []
+      config.test.reporters = config.test.reporters ?? ['default']
 
-      // config.test.reporters.push(new CustomReporter(finalOptions))
+      // Send story status to Storybook via websockets
+      config.test.reporters.push(new StorybookStatusReporter())
+      // Start Storybook CLI in background if not already running
+      config.test.reporters.push(new StorybookCliReporter(finalOptions))
 
       return config
     },

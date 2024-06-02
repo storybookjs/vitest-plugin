@@ -1,8 +1,10 @@
 import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
+import { expect } from '@storybook/test';
 import { Button } from './Button';
 
 const meta = {
+  title: 'Example/Button',
   component: Button,
 } satisfies Meta<typeof Button>;
 
@@ -15,6 +17,9 @@ export const Primary: Story = {
     primary: true,
     label: 'Button',
   },
+  play: async() => {
+    expect(1).toBe(2)
+  }
 };
 
 export const Secondary: Story = {
