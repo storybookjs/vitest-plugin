@@ -97,6 +97,24 @@ export const storybookTest = (options?: UserOptions): any => {
 
           process.env.DEBUG === 'storybook' && console.log('🟡 Setting project annotations from virtual setup file...')
           setProjectAnnotations(projectAnnotations)
+
+					const { getComputedStyle } = window
+					window.getComputedStyle = (elt) => getComputedStyle(elt)
+					window.scrollTo = () => {}
+
+					const ignoreList = [(error) => error.message.includes('act')]
+
+					const throwMessage = (type, message) => {
+						const error = new Error(\`\${type}\${message}\`)
+						if (!ignoreList.reduce((acc, item) => acc || item(error), false)) {
+							throw error
+						}
+					}
+					const throwWarning = (message) => throwMessage('warn: ', message)
+					const throwError = (message) => throwMessage('error: ', message)
+
+					vi.spyOn(console, 'warn').mockImplementation(throwWarning)
+					vi.spyOn(console, 'error').mockImplementation(throwError)
         `;
 				// log('Virtual setup file content:\n', setupFileContent)
 				return setupFileContent;
@@ -104,6 +122,9 @@ export const storybookTest = (options?: UserOptions): any => {
 		},
 		// biome-ignore lint: hello
 		async configResolved(config: any) {
+			config.define = config.define ?? {};
+			config.define["process.env"] = {};
+
 			config.test = config.test ?? {};
 			// add a prefix to the tests when in a workspace scenario
 			if (config.workspaceConfigPath) {
@@ -143,7 +164,7 @@ export const storybookTest = (options?: UserOptions): any => {
 			}
 
 			log("Final plugin options:", finalOptions);
-			log("Final Vitest config:", config);
+			// log("Final Vitest config:", config);
 
 			return config;
 		},

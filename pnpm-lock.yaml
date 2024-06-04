@@ -87,6 +87,9 @@ importers:
       '@storybook/test':
         specifier: 0.0.0-pr-27522-sha-b32386a1
         version: 0.0.0-pr-27522-sha-b32386a1(vitest@1.6.0(@types/node@20.12.11)(@vitest/browser@1.6.0)(@vitest/ui@1.6.0)(happy-dom@14.12.0)(jsdom@24.0.0))
+      '@testing-library/jest-dom':
+        specifier: ^6.4.5
+        version: 6.4.5(vitest@1.6.0(@types/node@20.12.11)(@vitest/browser@1.6.0)(@vitest/ui@1.6.0)(happy-dom@14.12.0)(jsdom@24.0.0))
       '@testing-library/react':
         specifier: ^15.0.7
         version: 15.0.7(@types/react@18.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -8655,7 +8658,7 @@ snapshots:
     dependencies:
       ansi-align: 3.0.1
       camelcase: 7.0.1
-      chalk: 5.0.1
+      chalk: 5.3.0
       cli-boxes: 3.0.0
       string-width: 5.1.2
       type-fest: 2.19.0

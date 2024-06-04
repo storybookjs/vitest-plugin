@@ -5,13 +5,14 @@
     "inspect": "serve .vite-inspect",
     "storybook": "storybook dev --port 6006",
     "test": "vitest run",
+    "test:browser": "vitest --browser",
     "test:ui": "vitest --ui",
     "test:watch": "vitest dev"
   },
   "devDependencies": {
-    "@storybook/experimental-vitest-plugin": "workspace:*",
     "@storybook/addon-essentials": "0.0.0-pr-27522-sha-b32386a1",
     "@storybook/addon-interactions": "0.0.0-pr-27522-sha-b32386a1",
+    "@storybook/experimental-vitest-plugin": "workspace:*",
     "@storybook/react": "0.0.0-pr-27522-sha-b32386a1",
     "@storybook/react-vite": "0.0.0-pr-27522-sha-b32386a1",
     "@storybook/test": "0.0.0-pr-27522-sha-b32386a1",
