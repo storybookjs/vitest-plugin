@@ -2,29 +2,30 @@
   "name": "test-example",
   "private": true,
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest dev",
-    "test:ui": "vitest --ui",
     "inspect": "serve .vite-inspect",
-    "storybook": "storybook dev --port 6006"
+    "storybook": "storybook dev --port 6006",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest dev"
   },
   "devDependencies": {
-    "@storybook/react": "^8.1.5",
-    "@storybook/react-vite": "^8.1.5",
-    "@storybook/addon-essentials": "^8.1.5",
-    "@storybook/addon-interactions": "^8.1.5",
-    "@storybook/test": "^8.1.5",
+    "@storybook/experimental-vitest-plugin": "workspace:*",
+    "@storybook/addon-essentials": "0.0.0-pr-27522-sha-b32386a1",
+    "@storybook/addon-interactions": "0.0.0-pr-27522-sha-b32386a1",
+    "@storybook/react": "0.0.0-pr-27522-sha-b32386a1",
+    "@storybook/react-vite": "0.0.0-pr-27522-sha-b32386a1",
+    "@storybook/test": "0.0.0-pr-27522-sha-b32386a1",
     "@testing-library/react": "^15.0.7",
     "@vitejs/plugin-react": "^4.3.0",
     "@vitest/browser": "^1.6.0",
     "@vitest/ui": "^1.6.0",
+    "happy-dom": "^14.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "serve": "^14.2.1",
+    "storybook": "0.0.0-pr-27522-sha-b32386a1",
     "vite-plugin-inspect": "^0.8.4",
-    "storybook": "^8.1.5",
     "vitest": "^1.6.0",
-    "vitest-plugin-storybook": "workspace:*",
     "webdriverio": "^8.36.1"
   }
 }

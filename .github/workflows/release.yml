@@ -10,17 +10,18 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # to create release (changesets/action)
-      pull-requests: write # to create pull request (changesets/action)
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - name: Create Release Pull Request or Publish to npm
-        uses: changesets/action@v1
+      - uses: actions/setup-node@v4
         with:
-          publish: pnpm release
-          version: pnpm bump
+          node-version: 18
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - run: pnpm build
+      - name: Release
+        run: |
+          pnpm release
+        working-directory: packages/vitest-plugin-storybook
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

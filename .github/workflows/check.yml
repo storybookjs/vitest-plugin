@@ -8,17 +8,15 @@ on:
 
 jobs:
   checks:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [18, 20]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - run: git config --global core.autocrlf false && git config --global core.eol lf
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
       - run: pnpm build
       - run: pnpm test
       - run: pnpm check
