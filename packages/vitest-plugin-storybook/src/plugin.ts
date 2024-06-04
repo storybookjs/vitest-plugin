@@ -1,8 +1,8 @@
-import { join } from "path";
+import { join } from "node:path";
 import type { Plugin } from "vite";
 import { StorybookReporter } from "./storybook-reporter";
 import { transform } from "./transformer";
-import { InternalOptions, UserOptions } from "./types";
+import type { InternalOptions, UserOptions } from "./types";
 import { PACKAGES_MAP, extractRenderer, log } from "./utils";
 
 const defaultOptions: UserOptions = {

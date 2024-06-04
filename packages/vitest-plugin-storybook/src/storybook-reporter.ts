@@ -5,7 +5,7 @@ import { TaskResultPack, TaskState, Vitest } from "vitest";
 import { Reporter } from "vitest/reporters";
 // @ts-expect-error types are missing
 import waitOn from "wait-on";
-import { InternalOptions } from "./types";
+import type { InternalOptions } from "./types";
 import { log } from "./utils";
 
 const stateToStatusMap = {

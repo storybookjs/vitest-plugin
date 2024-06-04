@@ -1,6 +1,6 @@
 import MagicString from "magic-string";
 import typescript from "typescript";
-import { InternalOptions } from "./types";
+import type { InternalOptions } from "./types";
 import { PACKAGES_MAP } from "./utils";
 
 // This function parses the source file to find all named exports and their positions.

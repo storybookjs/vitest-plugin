@@ -1,6 +1,6 @@
 import type { SupportedRenderers } from "./types";
 import { readFile } from "node:fs/promises";
-import { join } from "path";
+import { join } from "node:path";
 
 type RendererSpecificTemplates = {
 	storybookPackage: string;
