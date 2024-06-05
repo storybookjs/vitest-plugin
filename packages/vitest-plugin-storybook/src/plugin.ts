@@ -79,7 +79,7 @@ export const storybookTest = (options?: UserOptions): any => {
 				const setupFileContent = `
           import { afterEach, afterAll, vi } from 'vitest'
           import { setProjectAnnotations } from '${metadata.storybookPackage}'
-          import { cleanup } from '${metadata.testingLibraryPackage}'
+          import { cleanup } from '${metadata.testingLibraryPackage}/pure'
 
           import projectAnnotations from '${finalOptions.configDir}/preview'
 

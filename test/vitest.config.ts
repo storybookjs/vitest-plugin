@@ -16,7 +16,7 @@ export default mergeConfig(
 			}),
 		],
 		test: {
-			include: ["**/*.test.*"],
+			// include: ["**/*.test.*"],
 			browser: {
 				name: "chrome",
 			},
