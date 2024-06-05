@@ -12,18 +12,18 @@ export const PACKAGES_MAP = {
 	react: {
 		storybookPackage: "@storybook/react",
 		testingLibraryPackage: "@testing-library/react",
-		render: (composedStory) => `render(<${composedStory} />)`,
+		render: (composedStory) => `__render(<${composedStory} />)`,
 	},
 	vue3: {
 		storybookPackage: "@storybook/vue3",
 		testingLibraryPackage: "@testing-library/vue",
-		render: (composedStory) => `render(${composedStory})`,
+		render: (composedStory) => `__render(${composedStory})`,
 	},
 	svelte: {
 		storybookPackage: "@storybook/svelte",
 		testingLibraryPackage: "@testing-library/svelte",
 		render: (composedStory) =>
-			`render(${composedStory}.Component, ${composedStory}.props)`,
+			`__render(${composedStory}.Component, ${composedStory}.props)`,
 	},
 } satisfies Record<SupportedRenderers, RendererSpecificTemplates>;
 
