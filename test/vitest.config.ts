@@ -10,9 +10,13 @@ export default mergeConfig(
 			Inspect({ build: true, outputDir: ".vite-inspect" }),
 			storybookTest({
 				renderer: "react",
+				tags: {
+					skip: ["skip"],
+				},
 			}),
 		],
 		test: {
+			include: ["**/*.test.*"],
 			browser: {
 				name: "chrome",
 			},

@@ -20,6 +20,7 @@ export const Primary: Story = {
 	play: async () => {
 		expect(1).toBe(1);
 	},
+	tags: ["hello"],
 };
 
 export const Secondary: Story = {
@@ -33,3 +34,8 @@ export const Secondary: Story = {
 		},
 	},
 } satisfies Story;
+
+export const Skipped: Story = {
+	...Primary,
+	tags: ["skip"],
+};

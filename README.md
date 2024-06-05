@@ -4,7 +4,7 @@ The Storybook Vitest plugin transforms story files into test files using the por
 
 ## Requirements
 
-This is a Vitest plugin, so you have to have Vitest set up in your project.
+This is a Vitest plugin, so you have to have Vitest set up in your project. It relies on testing-library, so you must also have it set up in your project.
 
 ## Renderer support
 
@@ -107,6 +107,14 @@ The plugin should work out of the box, but there are extra functionalities if yo
 - **Type:** `string`
 - **Description:** The URL where Storybook is hosted. This is used to provide a link to the story in the test output on failures.
 - **Default:** `http://localhost:6006`
+
+### `tags`
+
+- **Type:** `object`
+- **Description:** Tags to include, exclude, or skip. These tags are defined as annotations in your story or meta.
+  - `include`: `string[]` - Tags to include.
+  - `exclude`: `string[]` - Tags to exclude.
+  - `skip`: `string[]` - Tags to skip.
 
 ## Usage
 

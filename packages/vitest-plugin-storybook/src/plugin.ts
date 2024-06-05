@@ -12,6 +12,11 @@ const defaultOptions: UserOptions = {
 	storybookUrl: "http://localhost:6006",
 	snapshot: false,
 	skipRunningStorybook: false,
+	tags: {
+		skip: [],
+		exclude: [],
+		include: [],
+	},
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: The type should ideally be Plugin from vite, but that causes issues in user land
@@ -19,7 +24,14 @@ export const storybookTest = (options?: UserOptions): any => {
 	const virtualSetupFileId = "/virtual:storybook-setup.js";
 	const resolvedVirtualSetupFileId = `\0${virtualSetupFileId}`;
 
-	const finalOptions = { ...defaultOptions, ...options } as InternalOptions;
+	const finalOptions = {
+		...defaultOptions,
+		...options,
+		tags: {
+			...defaultOptions.tags,
+			...options?.tags,
+		},
+	} as InternalOptions;
 
 	if (process.env.DEBUG) {
 		finalOptions.debug = true;
@@ -73,7 +85,7 @@ export const storybookTest = (options?: UserOptions): any => {
 
           const modifyErrorMessage = (task) => {
             task.tasks?.forEach((currentTask) => {
-              if (currentTask.type === 'test' && currentTask.result.state === 'fail') {
+              if (currentTask.type === 'test' && currentTask.result?.state === 'fail') {
                 const currentError = currentTask.result.errors[0]
                 let storyUrl = '${storybookUrl}/?path=/story/' + currentTask.meta.storyId
                 if (currentTask.meta.hasPlayFunction) {
