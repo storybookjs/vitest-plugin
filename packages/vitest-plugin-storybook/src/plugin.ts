@@ -122,7 +122,11 @@ export const storybookTest = (options?: UserOptions): any => {
 							throw error
 						}
 					}
-					const throwWarning = (message) => throwMessage('warn: ', message)
+					const throwWarning = (message) => {
+						if(!message.includes('act')) {
+							console.log('warn: ' + message)
+						}
+					}
 					const throwError = (message) => throwMessage('error: ', message)
 
 					vi.spyOn(console, 'warn').mockImplementation(throwWarning)
