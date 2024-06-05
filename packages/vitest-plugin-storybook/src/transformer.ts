@@ -126,7 +126,7 @@ export async function transform({
 							: ""
 					}
 					${options.snapshot ? "__expect(container).toMatchSnapshot();" : ""}
-				});
+				}, { ...(${composedStory}.parameters.test?.options) });
 			`;
 
 			// Add source map location for the position of the export name
