@@ -137,6 +137,8 @@ export const storybookTest = (options?: UserOptions): any => {
 			config.define = config.define ?? {};
 			config.define["process.env"] = {};
 
+			// current workaround for Vitest v1 projects where users have server.open = true in their App's vite config file
+			config.server.open = false;
 			config.test = config.test ?? {};
 			// add a prefix to the tests when in a workspace scenario
 			if (config.workspaceConfigPath) {
