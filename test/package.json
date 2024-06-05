@@ -18,15 +18,15 @@
     "@storybook/test": "0.0.0-pr-27522-sha-4e7fd5c5",
     "@testing-library/react": "^15.0.7",
     "@vitejs/plugin-react": "^4.3.0",
-    "@vitest/browser": "^1.6.0",
-    "@vitest/ui": "^1.6.0",
+    "@vitest/browser": "^2.0.0-beta.9",
+    "@vitest/ui": "^2.0.0-beta.9",
     "happy-dom": "^14.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "serve": "^14.2.1",
     "storybook": "0.0.0-pr-27522-sha-4e7fd5c5",
     "vite-plugin-inspect": "^0.8.4",
-    "vitest": "^1.6.0",
+    "vitest": "^2.0.0-beta.9",
     "webdriverio": "^8.36.1"
   }
 }
