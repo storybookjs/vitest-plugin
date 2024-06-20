@@ -46,7 +46,7 @@ const readMainConfig = async (configDirPath: string) => {
 	}
 };
 
-// Ideally the extracton should be done with CSF tools and AST parsing
+// Ideally the extraction should be done with CSF tools and AST parsing
 // But for now we just read the contents of the main config file and apply regexes
 export const extractRenderer = async (
 	configDirPath: string,

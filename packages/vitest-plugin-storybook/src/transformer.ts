@@ -117,6 +117,9 @@ export async function transform({
 					shouldSkip(${composedStory}.tags) && skip();
 					task.meta.storyId = ${composedStory}.id;
 					task.meta.hasPlayFunction = !!${composedStory}.play;
+
+				  await setViewport(${composedStory}.parameters.viewport);
+					
 					await ${composedStory}.load();
 					const { container } = ${metadata.render(composedStory)};
 					await ${composedStory}.play?.();
@@ -144,6 +147,7 @@ export async function transform({
 			import { composeStories as __composeStories } from '${
 				metadata.storybookPackage
 			}';
+			import { setViewport } from '@storybook/experimental-vitest-plugin/dist/viewports'
 			import { describe as __describe, test as __test, expect as __expect } from 'vitest';
 			import { render as __render } from '${metadata.testingLibraryPackage}/pure';
 			
