@@ -1,4 +1,3 @@
-import { log } from "./utils";
 declare global {
 	// biome-ignore lint/style/noVar: <explanation>
 	var __vitest_browser__: boolean;
