@@ -1,95 +1,101 @@
-import MagicString from "magic-string";
-import typescript from "typescript";
-import type { InternalOptions } from "./types";
-import { PACKAGES_MAP } from "./utils";
+import MagicString from 'magic-string'
+import typescript from 'typescript'
+import type { InternalOptions } from './types'
+import { PACKAGES_MAP } from './utils'
 
 // This function parses the source file to find all named exports and their positions.
 function findNamedExports(
-	sourceFile: typescript.SourceFile,
+  sourceFile: typescript.SourceFile
 ): { name: string; pos: number }[] {
-	const exportNames: { name: string; pos: number }[] = [];
+  const exportNames: { name: string; pos: number }[] = []
 
-	function visit(node: typescript.Node) {
-		// Check if the node is a named export within an export declaration
-		if (
-			typescript.isExportDeclaration(node) &&
-			node.exportClause &&
-			typescript.isNamedExports(node.exportClause)
-		) {
-			node.exportClause.elements.forEach((spec) => {
-				if (spec.name) {
-					// TODO fix sourcemap positions, it's not working as expected
-					exportNames.push({ name: spec.name.text, pos: spec.name.getStart() });
-				}
-			});
-		}
+  function visit(node: typescript.Node) {
+    // Check if the node is a named export within an export declaration
+    if (
+      typescript.isExportDeclaration(node) &&
+      node.exportClause &&
+      typescript.isNamedExports(node.exportClause)
+    ) {
+      node.exportClause.elements.forEach((spec) => {
+        if (spec.name) {
+          // TODO fix sourcemap positions, it's not working as expected
+          exportNames.push({
+            name: spec.name.text,
+            pos: spec.name.getStart(),
+          })
+        }
+      })
+    }
 
-		// Handle VariableStatement, FunctionDeclaration, or ClassDeclaration
-		if (
-			(typescript.isVariableStatement(node) ||
-				typescript.isFunctionDeclaration(node) ||
-				typescript.isClassDeclaration(node)) &&
-			node.modifiers
-		) {
-			if (
-				node.modifiers.some(
-					(mod) => mod.kind === typescript.SyntaxKind.ExportKeyword,
-				)
-			) {
-				if (typescript.isVariableStatement(node)) {
-					node.declarationList.declarations.forEach((decl) => {
-						if (typescript.isIdentifier(decl.name)) {
-							exportNames.push({
-								name: decl.name.text,
-								pos: 10,
-							});
-						}
-					});
-				} else if (node.name && typescript.isIdentifier(node.name)) {
-					exportNames.push({ name: node.name.text, pos: node.name.getStart() });
-				}
-			}
-		}
+    // Handle VariableStatement, FunctionDeclaration, or ClassDeclaration
+    if (
+      (typescript.isVariableStatement(node) ||
+        typescript.isFunctionDeclaration(node) ||
+        typescript.isClassDeclaration(node)) &&
+      node.modifiers
+    ) {
+      if (
+        node.modifiers.some(
+          (mod) => mod.kind === typescript.SyntaxKind.ExportKeyword
+        )
+      ) {
+        if (typescript.isVariableStatement(node)) {
+          node.declarationList.declarations.forEach((decl) => {
+            if (typescript.isIdentifier(decl.name)) {
+              exportNames.push({
+                name: decl.name.text,
+                pos: 10,
+              })
+            }
+          })
+        } else if (node.name && typescript.isIdentifier(node.name)) {
+          exportNames.push({
+            name: node.name.text,
+            pos: node.name.getStart(),
+          })
+        }
+      }
+    }
 
-		// Recursively visit all children of this node
-		typescript.forEachChild(node, visit);
-	}
+    // Recursively visit all children of this node
+    typescript.forEachChild(node, visit)
+  }
 
-	visit(sourceFile);
-	return exportNames;
+  visit(sourceFile)
+  return exportNames
 }
 
 // Main transform function for the Vitest plugin
 export async function transform({
-	code,
-	id,
-	options,
+  code,
+  id,
+  options,
 }: {
-	code: string;
-	id: string;
-	options: InternalOptions;
+  code: string
+  id: string
+  options: InternalOptions
 }) {
-	const isStoryFile = /\.stor(y|ies)\./.test(id);
-	if (!isStoryFile) {
-		return code;
-	}
-	const node = typescript.createSourceFile(
-		id,
-		code,
-		typescript.ScriptTarget.ESNext,
-	);
+  const isStoryFile = /\.stor(y|ies)\./.test(id)
+  if (!isStoryFile) {
+    return code
+  }
+  const node = typescript.createSourceFile(
+    id,
+    code,
+    typescript.ScriptTarget.ESNext
+  )
 
-	const exportNames = findNamedExports(node);
-	// If there are no exports, bail
-	if (exportNames.length === 0) return code;
+  const exportNames = findNamedExports(node)
+  // If there are no exports, bail
+  if (exportNames.length === 0) return code
 
-	const s = new MagicString(code);
-	const componentName =
-		id.split("/").pop()?.replace(/\.stories\.tsx?$/, "") || "Component";
+  const s = new MagicString(code)
+  const componentName =
+    id.split('/').pop()?.replace(/\.stories\.tsx?$/, '') || 'Component'
 
-	const metadata = PACKAGES_MAP[options.renderer];
+  const metadata = PACKAGES_MAP[options.renderer]
 
-	const filterFunctions = `
+  const filterFunctions = `
 		const includeTags = ${JSON.stringify(options.tags.include)}
 		const excludeTags = ${JSON.stringify(options.tags.exclude)}
 		const skipTags = ${JSON.stringify(options.tags.skip)}
@@ -107,12 +113,12 @@ export async function transform({
 		
 			return isIncluded && isNotExcluded
 		}
-	`;
+	`
 
-	const tests = exportNames
-		.map(({ name, pos }) => {
-			const composedStory = `${name}Story`;
-			const testCode = `
+  const tests = exportNames
+    .map(({ name, pos }) => {
+      const composedStory = `${name}Story`
+      const testCode = `
 				__test.runIf(shouldRun(${composedStory}.tags))('${name}', async ({ task, skip }) => {
 					shouldSkip(${composedStory}.tags) && skip();
 					task.meta.storyId = ${composedStory}.id;
@@ -124,29 +130,29 @@ export async function transform({
 					const { container } = ${metadata.render(composedStory)};
 					await ${composedStory}.play?.();
 					${
-						options.snapshot
-							? "await new Promise((resolve) => setTimeout(resolve, 1));"
-							: ""
-					}
-					${options.snapshot ? "__expect(container).toMatchSnapshot();" : ""}
+            options.snapshot
+              ? 'await new Promise((resolve) => setTimeout(resolve, 1));'
+              : ''
+          }
+					${options.snapshot ? '__expect(container).toMatchSnapshot();' : ''}
 				}, { ...(${composedStory}.parameters.test?.options) });
-			`;
+			`
 
-			// Add source map location for the position of the export name
-			s.addSourcemapLocation(pos);
+      // Add source map location for the position of the export name
+      s.addSourcemapLocation(pos)
 
-			return testCode;
-		})
-		.join("\n\n");
+      return testCode
+    })
+    .join('\n\n')
 
-	// Append the transformation code at the end of the file
-	// NOTE: we use /pure module from testing-library so the components are not unmounted by default
-	// we handle it, so that they can be seen in Vitest's UI mode.
-	s.append(
-		`// Virtual content generated by the Storybook Vitest plugin
+  // Append the transformation code at the end of the file
+  // NOTE: we use /pure module from testing-library so the components are not unmounted by default
+  // we handle it, so that they can be seen in Vitest's UI mode.
+  s.append(
+    `// Virtual content generated by the Storybook Vitest plugin
 			import { composeStories as __composeStories } from '${
-				metadata.storybookPackage
-			}';
+        metadata.storybookPackage
+      }';
 			import { setViewport } from '@storybook/experimental-vitest-plugin/dist/viewports'
 			import { describe as __describe, test as __test, expect as __expect } from 'vitest';
 			import { render as __render } from '${metadata.testingLibraryPackage}/pure';
@@ -157,16 +163,16 @@ export async function transform({
 				const stories = await import(/* @vite-ignore */ import.meta.url);
 
 				const { ${exportNames
-					.map((v) => `${v.name}: ${v.name}Story`)
-					.join(", ")} } = __composeStories(stories);
+          .map((v) => `${v.name}: ${v.name}Story`)
+          .join(', ')} } = __composeStories(stories);
 
 				${tests}
 			});
-		`,
-	);
+		`
+  )
 
-	return {
-		code: s.toString(),
-		map: s.generateMap({ hires: true, source: id }),
-	};
+  return {
+    code: s.toString(),
+    map: s.generateMap({ hires: true, source: id }),
+  }
 }
