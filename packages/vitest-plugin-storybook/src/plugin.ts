@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import type { Plugin } from 'vite'
 import { StorybookReporter } from './storybook-reporter'
 import { transform } from './transformer'
@@ -53,12 +53,13 @@ export const storybookTest = (options?: UserOptions): any => {
         // if you don't specify configDir, I'll try to find .storybook relative to the root
         finalOptions.configDir = join(process.cwd(), finalOptions.configDir)
       } else {
-        // if you do specify configDir, I'll try to find relative to the config file
-        finalOptions.configDir = join(
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
-          server.config.configFile!,
-          finalOptions.configDir
+        const vitestConfigDir = dirname(
+          server.config.configFile! ??
+            server.config.inlineConfig.configFile ??
+            server.config.root
         )
+        // if you do specify configDir, I'll try to find relative to the config file
+        finalOptions.configDir = join(vitestConfigDir, finalOptions.configDir)
       }
 
       if (!finalOptions.renderer) {
@@ -81,7 +82,7 @@ export const storybookTest = (options?: UserOptions): any => {
           import { setProjectAnnotations } from '${metadata.storybookPackage}'
           import { cleanup } from '${metadata.testingLibraryPackage}/pure'
 
-          import projectAnnotations from '${finalOptions.configDir}/preview'
+          import * as projectAnnotations from '${finalOptions.configDir}/preview'
 
           const modifyErrorMessage = (task) => {
             task.tasks?.forEach((currentTask) => {
@@ -136,10 +137,17 @@ export const storybookTest = (options?: UserOptions): any => {
         return setupFileContent
       }
     },
-    // biome-ignore lint: hello
+    // biome-ignore lint: fix types later
     async configResolved(config: any) {
-      config.define = config.define ?? {}
-      config.define['process.env'] = {}
+      // TODO: find a better way to detect if we're running in browser mode
+      const isRunningInBrowserMode = config.plugins.find((plugin: any) =>
+        plugin.name?.startsWith('vitest:browser')
+      )
+
+      if (isRunningInBrowserMode) {
+        config.define = config.define ?? {}
+        config.define['process.env'] = {}
+      }
 
       // current workaround for Vitest v1 projects where users have server.open = true in their App's vite config file
       config.server.open = false
