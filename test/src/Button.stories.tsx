@@ -76,6 +76,7 @@ const ResponsiveComponent = () => {
 }
 
 export const ResponsiveDesktop = {
+  tags: ['browser-only'],
   render: () => <ResponsiveComponent />,
   parameters: {
     viewport: {

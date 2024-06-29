@@ -75,7 +75,7 @@ The plugin should work out of the box, but there are extra functionalities if yo
 ### `configDir`
 
 - **Type:** `string`
-- **Description:** The directory where the Storybook configuration is located, relative to the Vitest configuration file. If not provided, the plugin will use `.storybook` in the current working directory.
+- **Description:** The directory where the Storybook configuration is located, relative to CWD. If not provided, the plugin will use `.storybook` in the current working directory.
 - **Default:** `.storybook`
 
 ### `storybookScript`

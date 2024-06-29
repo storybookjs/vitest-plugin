@@ -5,6 +5,7 @@
     "inspect": "serve .vite-inspect",
     "storybook": "storybook dev --port 6006",
     "test": "vitest",
+    "test:workspace": "vitest --workspace test-workspace.config.ts",
     "test:browser": "vitest --browser",
     "test:ui": "vitest --ui",
     "test:watch": "vitest dev"
@@ -27,7 +28,7 @@
     "serve": "^14.2.1",
     "storybook": "0.0.0-pr-27522-sha-4e7fd5c5",
     "vite-plugin-inspect": "^0.8.4",
-    "vitest": "^2.0.0-beta.10",
+    "vitest": "^2.0.0-beta.11",
     "webdriverio": "^8.36.1"
   }
 }

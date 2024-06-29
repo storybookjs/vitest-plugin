@@ -1,14 +1,16 @@
-import { join, dirname } from 'node:path'
+import { join } from 'node:path'
 import type { Plugin } from 'vite'
 import { StorybookReporter } from './storybook-reporter'
 import { transform } from './transformer'
 import type { InternalOptions, UserOptions } from './types'
 import { PACKAGES_MAP, extractRenderer, log } from './utils'
 
+const DEFAULT_CONFIG_DIR = '.storybook'
+
 const defaultOptions: UserOptions = {
   storybookScript: undefined,
   renderer: undefined,
-  configDir: '.storybook',
+  configDir: undefined,
   storybookUrl: 'http://localhost:6006',
   snapshot: false,
   skipRunningStorybook: false,
@@ -42,24 +44,18 @@ export const storybookTest = (options?: UserOptions): any => {
 
   return {
     name: 'vite-plugin-storybook-test',
-    enforce: 'pre',
+    enforce: 'pre' as const,
     resolveId(id) {
       if (id.startsWith(virtualSetupFileId)) {
         return resolvedVirtualSetupFileId
       }
     },
-    async configureServer(server) {
-      if (!options?.configDir) {
-        // if you don't specify configDir, I'll try to find .storybook relative to the root
-        finalOptions.configDir = join(process.cwd(), finalOptions.configDir)
-      } else {
-        const vitestConfigDir = dirname(
-          server.config.configFile! ??
-            server.config.inlineConfig.configFile ??
-            server.config.root
+    async configureServer() {
+      if (!finalOptions.configDir) {
+        finalOptions.configDir = join(
+          process.cwd(),
+          options?.configDir ?? DEFAULT_CONFIG_DIR
         )
-        // if you do specify configDir, I'll try to find relative to the config file
-        finalOptions.configDir = join(vitestConfigDir, finalOptions.configDir)
       }
 
       if (!finalOptions.renderer) {

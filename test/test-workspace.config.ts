@@ -13,9 +13,11 @@ export default defineWorkspace([
     ],
     test: {
       browser: {
+        enabled: true,
+        headless: true,
         name: 'chrome',
+        provider: 'webdriverio',
       },
-      environment: 'jsdom',
       includeSource: ['./src/**/*.stories.[jt]sx?'],
     },
   },

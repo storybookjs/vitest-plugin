@@ -11,7 +11,7 @@ export default mergeConfig(
       storybookTest({
         renderer: 'react',
         tags: {
-          skip: ['skip'],
+          skip: ['skip', 'browser-only'],
         },
       }),
     ],
