@@ -82,7 +82,7 @@ export const storybookTest = (options?: UserOptions): any => {
 
           const modifyErrorMessage = (task) => {
             task.tasks?.forEach((currentTask) => {
-              if (currentTask.type === 'test' && currentTask.result?.state === 'fail') {
+              if (currentTask.type === 'test' && currentTask.result?.state === 'fail' && currentTask.meta.storyId) {
                 const currentError = currentTask.result.errors[0]
                 let storyUrl = '${storybookUrl}/?path=/story/' + currentTask.meta.storyId
                 if (currentTask.meta.hasPlayFunction) {
