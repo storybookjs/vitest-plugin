@@ -7,11 +7,14 @@ import { Button } from './Button'
 const meta = {
   title: 'Example/Button',
   component: Button,
+  excludeStories: /.*Data$/,
 } satisfies Meta<typeof Button>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const myNonStoryData = 123
 
 export const Primary: Story = {
   args: {
@@ -75,7 +78,7 @@ const ResponsiveComponent = () => {
   )
 }
 
-export const ResponsiveDesktop = {
+export const ResponsiveDesktop: StoryObj = {
   tags: ['browser-only'],
   render: () => <ResponsiveComponent />,
   parameters: {
@@ -92,7 +95,7 @@ export const ResponsiveDesktop = {
   },
 }
 
-export const ResponsiveMobile = {
+export const ResponsiveMobile: StoryObj = {
   ...ResponsiveDesktop,
   parameters: {
     viewport: {

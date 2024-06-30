@@ -91,7 +91,10 @@ export async function transform({
 
   const s = new MagicString(code)
   const componentName =
-    id.split('/').pop()?.replace(/\.stories\.tsx?$/, '') || 'Component'
+    id
+      .split('/')
+      .pop()
+      ?.replace(/\.stories\.tsx?$/, '') || 'Component'
 
   const metadata = PACKAGES_MAP[options.renderer]
 
@@ -118,8 +121,11 @@ export async function transform({
   const tests = exportNames
     .map(({ name, pos }) => {
       const composedStory = `${name}Story`
+      // composeStories supports the excludeStories meta option, and because this happens at runtime,
+      // we need to check if the story is different than undefined, as excluded stories will be undefined
+      // hence the usage of !!${composedStory}
       const testCode = `
-				__test.runIf(shouldRun(${composedStory}.tags))('${name}', async ({ task, skip }) => {
+				!!${composedStory} && __test.runIf(shouldRun(${composedStory}.tags))('${name}', async ({ task, skip }) => {
 					shouldSkip(${composedStory}.tags) && skip();
 					task.meta.storyId = ${composedStory}.id;
 					task.meta.hasPlayFunction = !!${composedStory}.play;
