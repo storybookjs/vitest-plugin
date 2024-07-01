@@ -287,7 +287,7 @@ export const setViewport = async (
   let page
   try {
     const importPath = '/@id/__x00__@vitest/browser/context'
-    const vitestContext = await import(importPath)
+    const vitestContext = await import(/* @vite-ignore */ importPath)
     page = vitestContext.page
   } catch (e) {
     return
