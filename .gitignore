@@ -13,6 +13,8 @@ coverage
 test-results.json
 **/junit.xml
 
+__snapshot__
+
 
 /**/.yarn/*
 !/**/.yarn/releases

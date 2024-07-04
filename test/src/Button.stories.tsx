@@ -16,6 +16,13 @@ type Story = StoryObj<typeof meta>
 
 export const myExcludedData = 123
 
+export const Input: StoryObj = {
+  render: () => {
+    const [val, setVal] = useState('')
+    return <input onChange={(evt) => setVal(evt.target.value)} value={val} />
+  },
+}
+
 export const Primary: Story = {
   args: {
     primary: true,

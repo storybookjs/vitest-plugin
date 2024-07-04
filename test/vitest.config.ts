@@ -1,6 +1,6 @@
 import { storybookTest } from '@storybook/experimental-vitest-plugin'
 import Inspect from 'vite-plugin-inspect'
-import { defineConfig, mergeConfig } from 'vitest/config'
+import { defineConfig, mergeConfig, defaultExclude } from 'vitest/config'
 import viteConfig from './vite.config'
 
 export default mergeConfig(
@@ -16,10 +16,11 @@ export default mergeConfig(
       }),
     ],
     test: {
-      include: ['**/*.test.*', '**/*.test.*'],
+      include: ['**/*.test.*'],
+      exclude: [...defaultExclude, '**/portable-story.*'],
       browser: {
-        name: 'chrome',
-        provider: 'webdriverio',
+        name: 'chromium',
+        provider: 'playwright',
         headless: true,
       },
       environment: 'happy-dom',
