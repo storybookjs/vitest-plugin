@@ -96,7 +96,7 @@ export const storybookTest = (options?: UserOptions): any => {
             })
           }
 
-          afterEach(() => {
+          beforeEach(() => {
             process.env.DEBUG === 'storybook' && console.log('🟡 cleanup from testing library')
             cleanup()
           })

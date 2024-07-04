@@ -14,7 +14,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const myNonStoryData = 123
+export const myExcludedData = 123
 
 export const Primary: Story = {
   args: {
