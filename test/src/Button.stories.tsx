@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { expect, within } from '@storybook/test'
+import React, { useState, useEffect } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within } from '@storybook/test';
 
-import { Button } from './Button'
+import { Button } from './Button';
 
 const meta = {
   title: 'Example/Button',
   component: Button,
   excludeStories: /.*Data$/,
-} satisfies Meta<typeof Button>
+} satisfies Meta<typeof Button>;
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
-export const myExcludedData = 123
+export const myExcludedData = 123;
 
 export const Input: StoryObj = {
   render: () => {
-    const [val, setVal] = useState('')
-    return <input onChange={(evt) => setVal(evt.target.value)} value={val} />
+    const [val, setVal] = useState('');
+    return <input onChange={(evt) => setVal(evt.target.value)} value={val} />;
   },
-}
+};
 
 export const Primary: Story = {
   args: {
@@ -29,12 +29,12 @@ export const Primary: Story = {
     label: 'Button',
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const button = canvas.getByRole('button')
-    await expect(button).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button');
+    await expect(button).toBeInTheDocument();
   },
   tags: ['hello'],
-}
+};
 
 export const Secondary: Story = {
   args: {
@@ -46,32 +46,32 @@ export const Secondary: Story = {
       disableSnapshots: true,
     },
   },
-} satisfies Story
+} satisfies Story;
 
 export const Skipped: Story = {
   ...Primary,
   tags: ['skip'],
-}
+};
 
 const ResponsiveComponent = () => {
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768)
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
-  })
+  });
 
   const updateMedia = () => {
-    setIsDesktop(window.innerWidth > 768)
+    setIsDesktop(window.innerWidth > 768);
     setDimensions({
       width: window.innerWidth,
       height: window.innerHeight,
-    })
-  }
+    });
+  };
 
   useEffect(() => {
-    window.addEventListener('resize', updateMedia)
-    return () => window.removeEventListener('resize', updateMedia)
-  }, [])
+    window.addEventListener('resize', updateMedia);
+    return () => window.removeEventListener('resize', updateMedia);
+  }, []);
 
   return (
     <>
@@ -82,8 +82,8 @@ const ResponsiveComponent = () => {
         {dimensions.width} x {dimensions.height}
       </strong>
     </>
-  )
-}
+  );
+};
 
 export const ResponsiveDesktop: StoryObj = {
   tags: ['browser-only'],
@@ -94,13 +94,13 @@ export const ResponsiveDesktop: StoryObj = {
     },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const div = canvas.getByText('Desktop')
-    await expect(div).toBeInTheDocument()
-    const dimensions = canvas.getByText('2560 x 1280')
-    await expect(dimensions).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    const div = canvas.getByText('Desktop');
+    await expect(div).toBeInTheDocument();
+    const dimensions = canvas.getByText('2560 x 1280');
+    await expect(dimensions).toBeInTheDocument();
   },
-}
+};
 
 export const ResponsiveMobile: StoryObj = {
   ...ResponsiveDesktop,
@@ -110,10 +110,10 @@ export const ResponsiveMobile: StoryObj = {
     },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const div = canvas.getByText('Mobile')
-    await expect(div).toBeInTheDocument()
-    const dimensions = canvas.getByText('390 x 844')
-    await expect(dimensions).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    const div = canvas.getByText('Mobile');
+    await expect(div).toBeInTheDocument();
+    const dimensions = canvas.getByText('390 x 844');
+    await expect(dimensions).toBeInTheDocument();
   },
-}
+};
