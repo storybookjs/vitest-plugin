@@ -4,11 +4,10 @@ import { createResourceArchive } from '@chromatic-com/playwright';
 import { snapshot } from 'rrweb-snapshot';
 import { server, cdp } from '@vitest/browser/context';
 
-import { composeStories } from '@storybook/react';
 import { cleanup, render, screen } from '@testing-library/react';
-import * as stories from './Button.stories';
 
 import { Buffer } from 'buffer';
+import { Button } from './Button';
 globalThis.Buffer = Buffer;
 
 const { writeFile } = server.commands;
@@ -16,8 +15,6 @@ describe('Archive experiment', () => {
   beforeEach(() => {
     cleanup();
   });
-
-  const { Primary } = composeStories(stories);
 
   test('Primary', async () => {
     const mockPage = {
@@ -35,7 +32,7 @@ describe('Archive experiment', () => {
     };
     const completeArchive = await createResourceArchive({ page: mockPage as any });
 
-    render(<Primary />);
+    render(<Button label="Hello" />);
 
     const mockTestInfo = {
       testId: '123',
