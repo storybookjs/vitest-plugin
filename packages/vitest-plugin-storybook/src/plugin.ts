@@ -3,7 +3,7 @@ import type { Plugin } from 'vite'
 import { StorybookReporter } from './storybook-reporter'
 import { transform } from './transformer'
 import type { InternalOptions, UserOptions } from './types'
-import { PACKAGES_MAP, extractRenderer, log } from './utils'
+import { log } from './utils'
 
 const DEFAULT_CONFIG_DIR = '.storybook'
 
@@ -17,7 +17,7 @@ const defaultOptions: UserOptions = {
   tags: {
     skip: [],
     exclude: [],
-    include: [],
+    include: ['test'],
   },
 }
 
@@ -50,35 +50,12 @@ export const storybookTest = (options?: UserOptions): any => {
         return resolvedVirtualSetupFileId
       }
     },
-    async configureServer() {
-      if (!finalOptions.configDir) {
-        finalOptions.configDir = join(
-          process.cwd(),
-          options?.configDir ?? DEFAULT_CONFIG_DIR
-        )
-      }
-
-      if (!finalOptions.renderer) {
-        const extraction = await extractRenderer(finalOptions.configDir)
-        if ('error' in extraction) {
-          console.error(
-            'Error extracting renderer (you can bypass this extraction by providing the `renderer` option to the Storybook plugin):'
-          )
-          throw extraction.error
-        } else {
-          finalOptions.renderer = extraction.renderer
-        }
-      }
-    },
     load(id) {
       if (id === resolvedVirtualSetupFileId) {
-        const metadata = PACKAGES_MAP[finalOptions.renderer]
+        // The purpose of this virtual set up file is to modify the error message of failed tests
+        // and inject a link to the story in Storybook
         const setupFileContent = `
-          import { afterEach, afterAll, vi } from 'vitest'
-          import { setProjectAnnotations } from '${metadata.storybookPackage}'
-          import { cleanup } from '${metadata.testingLibraryPackage}/pure'
-
-          import * as projectAnnotations from '${finalOptions.configDir}/preview'
+          import { afterAll } from 'vitest'
 
           const modifyErrorMessage = (task) => {
             task.tasks?.forEach((currentTask) => {
@@ -96,47 +73,27 @@ export const storybookTest = (options?: UserOptions): any => {
             })
           }
 
-          beforeEach(() => {
-            process.env.DEBUG === 'storybook' && console.log('🟡 cleanup from testing library')
-            cleanup()
-          })
           afterAll(suite => {
             suite.tasks.forEach(modifyErrorMessage)
           })
-
-          process.env.DEBUG === 'storybook' && console.log('🟡 Setting project annotations from virtual setup file...')
-          setProjectAnnotations(projectAnnotations)
-
-					const { getComputedStyle } = window
-					window.getComputedStyle = (elt) => getComputedStyle(elt)
-					window.scrollTo = () => {}
-
-					const ignoreList = [(error) => error.message.includes('act')]
-
-					const throwMessage = (type, message) => {
-						const error = new Error(\`\${type}\${message}\`)
-						if (!ignoreList.reduce((acc, item) => acc || item(error), false)) {
-							throw error
-						}
-					}
-					const throwWarning = (message) => {
-						if(!message.includes('act')) {
-							console.log('warn: ' + message)
-						}
-					}
-					const throwError = (message) => throwMessage('error: ', message)
-
-					vi.spyOn(console, 'warn').mockImplementation(throwWarning)
-					vi.spyOn(console, 'error').mockImplementation(throwError)
         `
         // log('Virtual setup file content:\n', setupFileContent)
         return setupFileContent
       }
     },
+    async configureServer() {
+      // this might be useful in the future
+      if (!finalOptions.configDir) {
+        finalOptions.configDir = join(
+          process.cwd(),
+          options?.configDir ?? DEFAULT_CONFIG_DIR
+        )
+      }
+    },
     // biome-ignore lint: fix types later
     async configResolved(config: any) {
       // TODO: find a better way to detect if we're running in browser mode
-      const isRunningInBrowserMode = config.plugins.find((plugin: any) =>
+      const isRunningInBrowserMode = config.plugins.find((plugin: Plugin) =>
         plugin.name?.startsWith('vitest:browser')
       )
 
@@ -148,28 +105,6 @@ export const storybookTest = (options?: UserOptions): any => {
       // current workaround for Vitest v1 projects where users have server.open = true in their App's vite config file
       config.server.open = false
       config.test = config.test ?? {}
-      // add a prefix to the tests when in a workspace scenario
-      if (config.workspaceConfigPath) {
-        config.test.name = 'storybook'
-      }
-      // enable isolate false by default for better performance
-      if (config.test.isolate === undefined) {
-        config.test.isolate = false
-        // this is a workaround for now, Vitest has a bug where it doesn't respect the isolate option set by the plugin
-        config.test.poolOptions = config.test.poolOptions || {}
-        config.test.poolOptions.threads = config.test.poolOptions.threads || {}
-        config.test.poolOptions.forks = config.test.poolOptions.forks || {}
-        config.test.poolOptions.threads.isolate = false
-        config.test.poolOptions.forks.isolate = false
-      }
-      // enable globals so there's more compatibility with third party libraries e.g. vi-canvas-mock
-      config.test.globals = config.test.globals ?? true
-
-      config.test.include = config.test.include ?? []
-      if (typeof config.test.include === 'string') {
-        config.test.include = [config.test.include]
-      }
-      config.test.include.push('**/*.{story,stories}.?(c|m)[jt]s?(x)')
 
       config.test.setupFiles = config.test.setupFiles ?? []
       if (typeof config.test.setupFiles === 'string') {

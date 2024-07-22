@@ -14,8 +14,6 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const myExcludedData = 123
-
 export const Primary: Story = {
   args: {
     primary: true,
@@ -43,7 +41,7 @@ export const Secondary: Story = {
 
 export const Skipped: Story = {
   ...Primary,
-  tags: ['skip'],
+  tags: ['!test'],
 }
 
 const ResponsiveComponent = () => {
@@ -61,6 +59,7 @@ const ResponsiveComponent = () => {
     })
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: -
   useEffect(() => {
     window.addEventListener('resize', updateMedia)
     return () => window.removeEventListener('resize', updateMedia)
@@ -78,7 +77,7 @@ const ResponsiveComponent = () => {
   )
 }
 
-export const ResponsiveDesktop: StoryObj = {
+const ResponsiveDesktop: StoryObj = {
   tags: ['browser-only'],
   render: () => <ResponsiveComponent />,
   parameters: {
@@ -95,7 +94,7 @@ export const ResponsiveDesktop: StoryObj = {
   },
 }
 
-export const ResponsiveMobile: StoryObj = {
+const ResponsiveMobile: StoryObj = {
   ...ResponsiveDesktop,
   parameters: {
     viewport: {
@@ -110,3 +109,7 @@ export const ResponsiveMobile: StoryObj = {
     await expect(dimensions).toBeInTheDocument()
   },
 }
+
+export { ResponsiveDesktop, ResponsiveMobile }
+
+export const myExcludedData = 123

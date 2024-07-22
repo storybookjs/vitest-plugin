@@ -1,8 +1,8 @@
-import net from 'net'
-import { API_StatusUpdate, API_StatusValue } from '@storybook/types'
+import net from 'node:net'
+import type { API_StatusUpdate, API_StatusValue } from '@storybook/types'
 import execa from 'execa'
-import { TaskResultPack, TaskState, Vitest } from 'vitest'
-import { Reporter } from 'vitest/reporters'
+import type { TaskResultPack, TaskState, Vitest } from 'vitest'
+import type { Reporter } from 'vitest/reporters'
 // @ts-expect-error types are missing
 import waitOn from 'wait-on'
 import type { InternalOptions } from './types'
