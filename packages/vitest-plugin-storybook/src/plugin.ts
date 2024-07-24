@@ -92,18 +92,11 @@ export const storybookTest = (options?: UserOptions): any => {
     },
     // biome-ignore lint: fix types later
     async configResolved(config: any) {
-      // TODO: find a better way to detect if we're running in browser mode
-      const isRunningInBrowserMode = config.plugins.find((plugin: Plugin) =>
-        plugin.name?.startsWith('vitest:browser')
-      )
+      // If we end up needing to know if we are running in browser mode later
+      // const isRunningInBrowserMode = config.plugins.find((plugin: Plugin) =>
+      //   plugin.name?.startsWith('vitest:browser')
+      // )
 
-      if (isRunningInBrowserMode) {
-        config.define = config.define ?? {}
-        config.define['process.env'] = {}
-      }
-
-      // current workaround for Vitest v1 projects where users have server.open = true in their App's vite config file
-      config.server.open = false
       config.test = config.test ?? {}
 
       config.test.setupFiles = config.test.setupFiles ?? []
@@ -121,12 +114,14 @@ export const storybookTest = (options?: UserOptions): any => {
       }
 
       log('Final plugin options:', finalOptions)
-      // log("Final Vitest config:", config);
 
       return config
     },
     async transform(code, id) {
-      if (process.env.VITEST !== 'true') return code
+      if (process.env.VITEST !== 'true') {
+        return code
+      }
+
       if (id.match(/(story|stories)\.[cm]?[jt]sx?$/)) {
         return transform({
           code,

@@ -5,7 +5,7 @@ import {
   cleanup,
 } from '@testing-library/react/pure'
 
-import * as projectAnnotations from './.storybook/preview'
+import * as projectAnnotations from './preview'
 
 beforeEach(cleanup)
 

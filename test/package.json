@@ -5,7 +5,8 @@
     "inspect": "serve .vite-inspect",
     "storybook": "storybook dev --port 6006",
     "test": "vitest --reporter=verbose",
-    "test:simple": "vitest --reporter=verbose --config vitest.config.ts",
+    "test:storybook": "pnpm run test --project=storybook",
+    "test:simple": "pnpm run test --config vitest.config.ts",
     "test:ui": "vitest --ui",
     "test:watch": "vitest dev"
   },
