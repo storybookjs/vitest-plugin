@@ -1,6 +1,7 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
 import viteConfig from '../vite.config'
 import { storybookTest } from '@storybook/experimental-vitest-plugin'
+import Inspect from 'vite-plugin-inspect'
 
 export default mergeConfig(
   viteConfig,
@@ -9,6 +10,7 @@ export default mergeConfig(
       storybookTest({
         renderer: 'react',
       }),
+      Inspect({ build: true, outputDir: '.vite-inspect' }),
     ],
     test: {
       name: 'storybook',

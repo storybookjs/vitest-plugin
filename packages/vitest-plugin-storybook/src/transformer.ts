@@ -142,7 +142,8 @@ export async function transform({
   const metadata = PACKAGES_MAP[options.renderer]
   // Add necessary imports to the transformed file
   s.append(
-    dedent`import { test as __test } from 'vitest';
+    dedent`\n
+      import { test as __test } from 'vitest';
       import { composeStories as __composeStories } from '${metadata.storybookPackage}';
       import { shouldRun, testStory as __testStory } from '@storybook/experimental-vitest-plugin/dist/test-utils';
     `
