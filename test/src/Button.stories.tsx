@@ -28,6 +28,9 @@ export const Primary: Story = {
 }
 
 export const Secondary: Story = {
+  render: (args) => {
+    return <Button {...args} />
+  },
   args: {
     ...Primary.args,
     primary: false,

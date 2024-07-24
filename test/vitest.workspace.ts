@@ -15,28 +15,22 @@ export default defineWorkspace([
     test: {
       name: 'storybook',
       include: [
-        // '**/*.transformed.test.*',
         '**/*.{story,stories}.?(c|m)[jt]s?(x)',
+        // '**/*.transformed.*',
       ],
       browser: {
         enabled: true,
-        name: 'chrome',
-        provider: 'webdriverio',
+        name: 'chromium',
+        // information about wdio vs playwright:
+        // wdio doesn't support parallelization
+        // wdio's userEvent API is sometimes 2x slower
+        // wdio is slow in general because every action is an http request rather than websocket connection
+        provider: 'playwright',
         headless: true,
+        screenshotFailures: false,
       },
       setupFiles: ['./setupTests.ts'],
       environment: 'happy-dom',
-
-      // isolate experiments
-      // isolate: false,
-      // poolOptions: {
-      //   threads: {
-      //     isolate: false,
-      //   },
-      //   forks: {
-      //     isolate: false
-      //   }
-      // }
     },
   },
 ])

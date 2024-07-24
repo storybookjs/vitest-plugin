@@ -1,5 +1,6 @@
 import MagicString from 'magic-string'
 import typescript from 'typescript'
+import dedent from 'ts-dedent'
 import type { InternalOptions } from './types'
 import { PACKAGES_MAP } from './utils'
 
@@ -65,16 +66,44 @@ export async function transform({
 
   modifyMeta(defaultExportNode)
 
+  const declarationMap = new Map<string, typescript.Node>()
+
+  // declarations are collected in order to prepend the test statement to stories which do
+  // const MyStory = {}; export { MyStory };
+  const collectDeclarations = (node: typescript.Node) => {
+    if (
+      typescript.isVariableDeclaration(node) &&
+      typescript.isIdentifier(node.name)
+    ) {
+      declarationMap.set(node.name.text, node)
+    }
+
+    typescript.forEachChild(node, collectDeclarations)
+  }
+
+  collectDeclarations(sourceFile)
+
   const addTestStatementToStory = (
-    element: typescript.ExportSpecifier | typescript.VariableDeclaration,
-    node: typescript.ExportDeclaration | typescript.VariableStatement
+    element: typescript.ExportSpecifier | typescript.VariableDeclaration
   ) => {
     const exportName = element.name.getText()
-    const insertPos = node.end
-    s.appendRight(
-      insertPos,
-      `\nmakeTest(composeStory(${exportName}, ${metaExportName}), ${tagsFilter}, "${exportName}");`
-    )
+    const firstChar = element.parent.parent.getStart()
+    const lastChar = code.indexOf('\n', firstChar)
+
+    /**
+     * declarationLine: export const Primary: Story = {\n
+     *                  ^                              ^
+     *              firstChar                       lastChar
+     */
+    const declarationLine = code.substring(firstChar, lastChar)
+
+    const testStatement = dedent`
+      __test('${exportName}', __testStory('${exportName}', import.meta.url, __composeStories, ${tagsFilter}));
+    `
+
+    // Rewrite story declaration while keeping original source map location
+    const newDeclarationLine = `${testStatement}\n${declarationLine}`
+    s.overwrite(firstChar, lastChar, newDeclarationLine)
   }
 
   // Traverse the AST and find all named exports
@@ -86,7 +115,10 @@ export async function transform({
       typescript.isNamedExports(node.exportClause)
     ) {
       for (const element of node.exportClause.elements) {
-        addTestStatementToStory(element, node)
+        const declaration = declarationMap.get(element.name.text)
+        if (declaration) {
+          addTestStatementToStory(declaration as typescript.VariableDeclaration)
+        }
       }
     } else if (
       // defined stories like "export const Primary = {}"
@@ -97,7 +129,7 @@ export async function transform({
     ) {
       for (const declaration of node.declarationList.declarations) {
         if (typescript.isIdentifier(declaration.name)) {
-          addTestStatementToStory(declaration, node)
+          addTestStatementToStory(declaration)
         }
       }
     }
@@ -108,16 +140,19 @@ export async function transform({
   typescript.forEachChild(sourceFile, modifyStories)
 
   const metadata = PACKAGES_MAP[options.renderer]
-  // Append the transformation code at the end of the file
+  // Add necessary imports to the transformed file
   s.append(
+    dedent`import { test as __test } from 'vitest';
+      import { composeStories as __composeStories } from '${metadata.storybookPackage}';
+      import { shouldRun, testStory as __testStory } from '@storybook/experimental-vitest-plugin/dist/test-utils';
     `
-			import { composeStory } from '${metadata.storybookPackage}';
-			import { makeTest } from '@storybook/experimental-vitest-plugin/dist/make-test';
-		`
   )
 
   return {
     code: s.toString(),
-    map: s.generateMap({ hires: true, source: id }),
+    map: s.generateMap({
+      hires: true,
+      source: id,
+    }),
   }
 }

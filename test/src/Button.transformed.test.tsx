@@ -15,17 +15,21 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+__test(
+  'Primary',
+  testStory('Primary', import.meta.url, composeStories, {
+    include: ['test'],
+    exclude: [],
+    skip: ['skip'],
+  })
+)
 export const Primary: Story = {
   args: {
     primary: true,
     label: 'Button',
   },
 }
-makeTest(
-  composeStory(Primary, meta),
-  { include: ['test'], exclude: [], skip: ['skip'] },
-  'Primary'
-)
 
-import { composeStory } from '@storybook/react'
-import { makeTest } from '@storybook/experimental-vitest-plugin/dist/make-test'
+import { test as __test } from 'vitest'
+import { composeStories } from '@storybook/react'
+import { testStory } from '@storybook/experimental-vitest-plugin/dist/test-utils'

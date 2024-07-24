@@ -1,8 +1,13 @@
-import { beforeAll } from 'vitest'
+import { beforeAll, beforeEach } from 'vitest'
 import { setProjectAnnotations } from '@storybook/react'
-import { render as testingLibraryRender } from '@testing-library/react'
+import {
+  render as testingLibraryRender,
+  cleanup,
+} from '@testing-library/react/pure'
 
 import * as projectAnnotations from './.storybook/preview'
+
+beforeEach(cleanup)
 
 const annotations = setProjectAnnotations([
   projectAnnotations,
