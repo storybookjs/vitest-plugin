@@ -113,6 +113,13 @@ export const storybookTest = (options?: UserOptions): any => {
         config.test.reporters.push(new StorybookReporter(finalOptions))
       }
 
+      config.test.server = config.test.server ?? {}
+      config.test.server.deps = config.test.server.deps ?? {}
+      config.test.server.deps.inline = config.test.server.deps.inline ?? []
+      config.test.server.deps.inline.push(
+        '@storybook/experimental-vitest-plugin'
+      )
+
       log('Final plugin options:', finalOptions)
 
       return config
