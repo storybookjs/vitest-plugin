@@ -26,11 +26,6 @@
       "require": "./dist/test-utils.cjs",
       "import": "./dist/test-utils.js"
     },
-    "./browser-mocks": {
-      "types": "./dist/browser-mocks.d.ts",
-      "require": "./dist/browser-mocks.cjs",
-      "import": "./dist/browser-mocks.js"
-    },
     "./package.json": "./package.json"
   },
   "files": ["dist"],
