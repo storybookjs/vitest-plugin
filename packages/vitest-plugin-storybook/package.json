@@ -1,74 +1,72 @@
 {
-	"name": "@storybook/experimental-vitest-plugin",
-	"version": "0.0.0",
-	"description": "Vite plugin for story testing powered by Vitest",
-	"keywords": [
-		"vite",
-		"plugin",
-		"storybook",
-		"test",
-		"testing",
-		"vitest"
-	],
-	"homepage": "https://github.com/storybookjs/vitest-plugin#readme",
-	"bugs": {
-		"url": "https://github.com/storybookjs/vitest-plugin/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/storybookjs/vitest-plugin.git"
-	},
-	"license": "MIT",
-	"author": "Yann Braga <yannbf@gmail.com>",
-	"type": "module",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"node": "./dist/index.cjs",
-			"require": "./dist/index.cjs",
-			"import": "./dist/index.js"
-		},
-		"./dist/viewports": {
-			"types": "./dist/viewports.d.ts",
-			"require": "./dist/viewports.cjs",
-			"import": "./dist/viewports.js"
-		},
-		"./package.json": "./package.json"
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"build": "tsup",
-		"check": "tsc --noEmit",
-		"release": "auto shipit"
-	},
-	"dependencies": {
-		"execa": "^5.0.0",
-		"magic-string": "^0.30.10",
-		"typescript": "^5.0.0",
-		"wait-on": "^7.2.0"
-	},
-	"devDependencies": {
-		"@storybook/react": "^8.1.0",
-		"@storybook/types": "^8.1.0",
-		"@testing-library/jest-dom": "^6.4.5",
-		"@testing-library/react": "^15.0.7",
-		"@types/node": "^20.12.11",
-		"@types/testing-library__jest-dom": "^6.0.0",
-		"auto": "^11.1.6",
-		"jsdom": "^24.0.0",
-		"react": "^18.3.1",
-		"react-dom": "^18.3.1",
-		"tsup": "^8.0.1",
-		"typescript": "^5.0.0",
-		"vite": "^5.0.2",
-		"vitest": "^2.0.0"
-	},
-	"peerDependencies": {
-		"vitest": "^2.0.0"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@storybook/experimental-vitest-plugin",
+  "version": "0.0.0",
+  "description": "Vite plugin for story testing powered by Vitest",
+  "keywords": ["vite", "plugin", "storybook", "test", "testing", "vitest"],
+  "homepage": "https://github.com/storybookjs/vitest-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/storybookjs/vitest-plugin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/storybookjs/vitest-plugin.git"
+  },
+  "license": "MIT",
+  "author": "Yann Braga <yannbf@gmail.com>",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./dist/index.cjs",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./setup": {
+      "types": "./dist/setup-file.d.ts",
+      "require": "./dist/setup-file.cjs",
+      "import": "./dist/setup-file.js"
+    },
+    "./dist/test-utils": {
+      "types": "./dist/test-utils.d.ts",
+      "require": "./dist/test-utils.cjs",
+      "import": "./dist/test-utils.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "check": "tsc --noEmit",
+    "release": "auto shipit"
+  },
+  "dependencies": {
+    "execa": "^5.0.0",
+    "magic-string": "^0.30.10",
+    "typescript": "^5.0.0",
+    "wait-on": "^7.2.0"
+  },
+  "devDependencies": {
+    "@storybook/react": "^8.1.0",
+    "@storybook/types": "^8.1.0",
+    "@testing-library/jest-dom": "^6.4.5",
+    "@testing-library/react": "^15.0.7",
+    "@types/node": "^20.12.11",
+    "@types/testing-library__jest-dom": "^6.0.0",
+    "@vitest/browser": "^2.0.0",
+    "auto": "^11.1.6",
+    "jsdom": "^24.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "ts-dedent": "^2.2.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.2",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,69 +1,8 @@
 import MagicString from 'magic-string'
 import typescript from 'typescript'
+import dedent from 'ts-dedent'
 import type { InternalOptions } from './types'
 import { PACKAGES_MAP } from './utils'
-
-// This function parses the source file to find all named exports and their positions.
-function findNamedExports(
-  sourceFile: typescript.SourceFile
-): { name: string; pos: number }[] {
-  const exportNames: { name: string; pos: number }[] = []
-
-  function visit(node: typescript.Node) {
-    // Check if the node is a named export within an export declaration
-    if (
-      typescript.isExportDeclaration(node) &&
-      node.exportClause &&
-      typescript.isNamedExports(node.exportClause)
-    ) {
-      node.exportClause.elements.forEach((spec) => {
-        if (spec.name) {
-          // TODO fix sourcemap positions, it's not working as expected
-          exportNames.push({
-            name: spec.name.text,
-            pos: spec.name.getStart(),
-          })
-        }
-      })
-    }
-
-    // Handle VariableStatement, FunctionDeclaration, or ClassDeclaration
-    if (
-      (typescript.isVariableStatement(node) ||
-        typescript.isFunctionDeclaration(node) ||
-        typescript.isClassDeclaration(node)) &&
-      node.modifiers
-    ) {
-      if (
-        node.modifiers.some(
-          (mod) => mod.kind === typescript.SyntaxKind.ExportKeyword
-        )
-      ) {
-        if (typescript.isVariableStatement(node)) {
-          node.declarationList.declarations.forEach((decl) => {
-            if (typescript.isIdentifier(decl.name)) {
-              exportNames.push({
-                name: decl.name.text,
-                pos: 10,
-              })
-            }
-          })
-        } else if (node.name && typescript.isIdentifier(node.name)) {
-          exportNames.push({
-            name: node.name.text,
-            pos: node.name.getStart(),
-          })
-        }
-      }
-    }
-
-    // Recursively visit all children of this node
-    typescript.forEachChild(node, visit)
-  }
-
-  visit(sourceFile)
-  return exportNames
-}
 
 // Main transform function for the Vitest plugin
 export async function transform({
@@ -79,106 +18,146 @@ export async function transform({
   if (!isStoryFile) {
     return code
   }
-  const node = typescript.createSourceFile(
+  const sourceFile = typescript.createSourceFile(
     id,
     code,
-    typescript.ScriptTarget.ESNext
+    typescript.ScriptTarget.ESNext,
+    true
   )
 
-  const exportNames = findNamedExports(node)
-  // If there are no exports, bail
-  if (exportNames.length === 0) return code
-
   const s = new MagicString(code)
-  const componentName =
-    id
-      .split('/')
-      .pop()
-      ?.replace(/\.stories\.tsx?$/, '') || 'Component'
+
+  const tagsFilter = JSON.stringify({
+    include: options.tags.include,
+    exclude: options.tags.exclude,
+    skip: options.tags.skip,
+  })
+
+  let metaExportName = '__STORYBOOK_META__'
+
+  const modifyMeta = (node: typescript.ExportAssignment) => {
+    const exportExpression = node.expression
+
+    if (typescript.isIdentifier(exportExpression)) {
+      // Handle default export as a variable, e.g. "export default meta"
+      // get the name of the variable to use later when appending composeStory below each story
+      metaExportName = exportExpression.getText()
+    } else if (typescript.isObjectLiteralExpression(exportExpression)) {
+      // Handle inline default export, e.g. "export default {}"
+      // rewrite it to const __STORYBOOK_META__ = {}; export default __STORYBOOK_META__;
+      const defaultExportCode = code.substring(
+        exportExpression.getStart(),
+        exportExpression.getEnd()
+      )
+      const insertPos = node.getStart()
+      s.overwrite(
+        insertPos,
+        node.getEnd(),
+        `const ${metaExportName} = ${defaultExportCode};\nexport default ${metaExportName};`
+      )
+    }
+  }
+
+  const defaultExportNode = sourceFile.statements.find((node) =>
+    typescript.isExportAssignment(node)
+  ) as typescript.ExportAssignment
+
+  if (!defaultExportNode) {
+    throw new Error(
+      'The Storybook vitest plugin could not detect the meta (default export) object in the story file. \n\nPlease make sure you have a default export with the meta object. If you are using a different export format that is not supported, please file an issue with details about your use case.'
+    )
+  }
+
+  modifyMeta(defaultExportNode)
+
+  const declarationMap = new Map<string, typescript.Node>()
+
+  // declarations are collected in order to prepend the test statement to stories which do
+  // const MyStory = {}; export { MyStory };
+  const collectDeclarations = (node: typescript.Node) => {
+    if (
+      typescript.isVariableDeclaration(node) &&
+      typescript.isIdentifier(node.name)
+    ) {
+      declarationMap.set(node.name.text, node)
+    }
+
+    typescript.forEachChild(node, collectDeclarations)
+  }
+
+  collectDeclarations(sourceFile)
+
+  const addTestStatementToStory = (
+    element: typescript.ExportSpecifier | typescript.VariableDeclaration
+  ) => {
+    const exportName = element.name.getText()
+    const firstChar = element.parent.parent.getStart()
+    const lastChar = code.indexOf('\n', firstChar)
+
+    /**
+     * declarationLine: export const Primary: Story = {\n
+     *                  ^                              ^
+     *              firstChar                       lastChar
+     */
+    const declarationLine = code.substring(firstChar, lastChar)
+
+    const testStatement = dedent`
+      __test('${exportName}', __testStory('${exportName}', import.meta.url, __composeStories, ${tagsFilter}));
+    `
+
+    // Rewrite story declaration while keeping original source map location
+    const newDeclarationLine = `${testStatement}\n${declarationLine}`
+    s.overwrite(firstChar, lastChar, newDeclarationLine)
+  }
+
+  // Traverse the AST and find all named exports
+  const modifyStories = (node: typescript.Node) => {
+    if (
+      // defined stories like "export { Primary }"
+      typescript.isExportDeclaration(node) &&
+      node.exportClause &&
+      typescript.isNamedExports(node.exportClause)
+    ) {
+      for (const element of node.exportClause.elements) {
+        const declaration = declarationMap.get(element.name.text)
+        if (declaration) {
+          addTestStatementToStory(declaration as typescript.VariableDeclaration)
+        }
+      }
+    } else if (
+      // defined stories like "export const Primary = {}"
+      typescript.isVariableStatement(node) &&
+      node.modifiers?.some(
+        (mod) => mod.kind === typescript.SyntaxKind.ExportKeyword
+      )
+    ) {
+      for (const declaration of node.declarationList.declarations) {
+        if (typescript.isIdentifier(declaration.name)) {
+          addTestStatementToStory(declaration)
+        }
+      }
+    }
+
+    typescript.forEachChild(node, modifyStories)
+  }
+
+  typescript.forEachChild(sourceFile, modifyStories)
 
   const metadata = PACKAGES_MAP[options.renderer]
-
-  const filterFunctions = `
-		const includeTags = ${JSON.stringify(options.tags.include)}
-		const excludeTags = ${JSON.stringify(options.tags.exclude)}
-		const skipTags = ${JSON.stringify(options.tags.skip)}
-
-		const shouldSkip = (storyTags = []) => {
-			return skipTags.some((tag) => storyTags.includes(tag))
-		}
-		
-		const shouldRun = (storyTags = []) => {
-			const isIncluded =
-				includeTags.length === 0 ||
-				includeTags.some((tag) => storyTags.includes(tag))
-		
-			const isNotExcluded = excludeTags.every((tag) => !storyTags.includes(tag))
-		
-			return isIncluded && isNotExcluded
-		}
-	`
-
-  const tests = exportNames
-    .map(({ name, pos }) => {
-      const composedStory = `${name}Story`
-      // composeStories supports the excludeStories meta option, and because this happens at runtime,
-      // we need to check if the story is different than undefined, as excluded stories will be undefined
-      // hence the usage of !!${composedStory}
-      const testCode = `
-				!!${composedStory} && __test.runIf(shouldRun(${composedStory}.tags))('${name}', async ({ task, skip }) => {
-					shouldSkip(${composedStory}.tags) && skip();
-					task.meta.storyId = ${composedStory}.id;
-					task.meta.hasPlayFunction = !!${composedStory}.play;
-
-				  await setViewport(${composedStory}.parameters.viewport);
-					
-					await ${composedStory}.load();
-					const { container } = ${metadata.render(composedStory)};
-					await ${composedStory}.play?.();
-					${
-            options.snapshot
-              ? 'await new Promise((resolve) => setTimeout(resolve, 1));'
-              : ''
-          }
-					${options.snapshot ? '__expect(container).toMatchSnapshot();' : ''}
-				}, { ...(${composedStory}.parameters.test?.options) });
-			`
-
-      // Add source map location for the position of the export name
-      s.addSourcemapLocation(pos)
-
-      return testCode
-    })
-    .join('\n\n')
-
-  // Append the transformation code at the end of the file
-  // NOTE: we use /pure module from testing-library so the components are not unmounted by default
-  // we handle it, so that they can be seen in Vitest's UI mode.
+  // Add necessary imports to the transformed file
   s.append(
-    `// Virtual content generated by the Storybook Vitest plugin
-			import { composeStories as __composeStories } from '${
-        metadata.storybookPackage
-      }';
-			import { setViewport } from '@storybook/experimental-vitest-plugin/dist/viewports'
-			import { describe as __describe, test as __test, expect as __expect } from 'vitest';
-			import { render as __render } from '${metadata.testingLibraryPackage}/pure';
-			
-			${filterFunctions}
-
-      __describe('${componentName}', async () => {
-				const stories = await import(/* @vite-ignore */ import.meta.url);
-
-				const { ${exportNames
-          .map((v) => `${v.name}: ${v.name}Story`)
-          .join(', ')} } = __composeStories(stories);
-
-				${tests}
-			});
-		`
+    dedent`\n
+      import { test as __test } from 'vitest';
+      import { composeStories as __composeStories } from '${metadata.storybookPackage}';
+      import { testStory as __testStory } from '@storybook/experimental-vitest-plugin/dist/test-utils';
+    `
   )
 
   return {
     code: s.toString(),
-    map: s.generateMap({ hires: true, source: id }),
+    map: s.generateMap({
+      hires: true,
+      source: id,
+    }),
   }
 }

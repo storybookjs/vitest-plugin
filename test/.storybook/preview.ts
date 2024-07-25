@@ -1,6 +1,7 @@
+import type { Preview } from '@storybook/react'
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport'
 
-const preview = {
+const preview: Preview = {
   parameters: {
     viewport: {
       defaultViewport: 'responsive',

@@ -5,7 +5,7 @@ const delay = async (time = 100) =>
 
 const runFailures = false
 
-// for misc testing
+// for misc testing regarding vitest task metadata
 describe('1', () => {
   describe('2', () => {
     test('2.1', ({ task }) => {

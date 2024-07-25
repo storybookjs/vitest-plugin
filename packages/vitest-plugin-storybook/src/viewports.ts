@@ -1,5 +1,5 @@
+import type { BrowserPage } from '@vitest/browser/context'
 declare global {
-  // biome-ignore lint/style/noVar: <explanation>
   var __vitest_browser__: boolean
 }
 
@@ -284,7 +284,7 @@ export const setViewport = async (
   const defaultViewport = viewportsParam.defaultViewport
   if (!defaultViewport || !globalThis.__vitest_browser__) return null
 
-  let page
+  let page: BrowserPage
   try {
     const importPath = '/@id/__x00__@vitest/browser/context'
     const vitestContext = await import(/* @vite-ignore */ importPath)
@@ -302,8 +302,8 @@ export const setViewport = async (
     const styles = viewports[defaultViewport].styles
     if (styles?.width && styles?.height) {
       const { width, height } = {
-        width: parseInt(styles.width),
-        height: parseInt(styles.height),
+        width: Number.parseInt(styles.width),
+        height: Number.parseInt(styles.height),
       }
       await page.viewport(width, height)
     }

@@ -21,7 +21,7 @@
     "outDir": "dist",
     "declaration": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "typings.d.ts"]
 }
