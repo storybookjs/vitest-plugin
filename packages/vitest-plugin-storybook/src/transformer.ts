@@ -27,7 +27,11 @@ export async function transform({
 
   const s = new MagicString(code)
 
-  const tagsFilter = `{ include: ${JSON.stringify(options.tags.include)}, exclude: ${JSON.stringify(options.tags.exclude)}, skip: ${JSON.stringify(options.tags.skip)} }`
+  const tagsFilter = JSON.stringify({
+    include: options.tags.include,
+    exclude: options.tags.exclude,
+    skip: options.tags.skip,
+  })
 
   let metaExportName = '__STORYBOOK_META__'
 
