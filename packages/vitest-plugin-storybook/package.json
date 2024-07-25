@@ -23,7 +23,6 @@
     },
     "./setup": {
       "types": "./dist/setup-file.d.ts",
-      "require": "./dist/setup-file.cjs",
       "import": "./dist/setup-file.js"
     },
     "./dist/test-utils": {
