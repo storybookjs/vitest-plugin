@@ -20,6 +20,7 @@ export default mergeConfig(
         name: 'chromium',
         provider: 'playwright',
         headless: true,
+        screenshotFailures: false,
       },
       setupFiles: ['./setupTests.ts'],
       environment: 'happy-dom',

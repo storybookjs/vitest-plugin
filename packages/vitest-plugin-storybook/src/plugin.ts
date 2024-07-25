@@ -23,9 +23,6 @@ const defaultOptions: UserOptions = {
 
 // biome-ignore lint/suspicious/noExplicitAny: The type should ideally be Plugin from vite, but that causes issues in user land
 export const storybookTest = (options?: UserOptions): any => {
-  const virtualSetupFileId = '/virtual:storybook-setup.js'
-  const resolvedVirtualSetupFileId = `\0${virtualSetupFileId}`
-
   const finalOptions = {
     ...defaultOptions,
     ...options,
@@ -39,48 +36,11 @@ export const storybookTest = (options?: UserOptions): any => {
     finalOptions.debug = true
   }
 
-  // storybookUrl is used in CI to point to a deployed Storybook URL
   const storybookUrl = finalOptions.storybookUrl || defaultOptions.storybookUrl
 
   return {
     name: 'vite-plugin-storybook-test',
     enforce: 'pre' as const,
-    resolveId(id) {
-      if (id.startsWith(virtualSetupFileId)) {
-        return resolvedVirtualSetupFileId
-      }
-    },
-    load(id) {
-      if (id === resolvedVirtualSetupFileId) {
-        // The purpose of this virtual set up file is to modify the error message of failed tests
-        // and inject a link to the story in Storybook
-        const setupFileContent = `
-          import { afterAll } from 'vitest'
-
-          const modifyErrorMessage = (task) => {
-            task.tasks?.forEach((currentTask) => {
-              if (currentTask.type === 'test' && currentTask.result?.state === 'fail' && currentTask.meta.storyId) {
-                const currentError = currentTask.result.errors[0]
-                let storyUrl = '${storybookUrl}/?path=/story/' + currentTask.meta.storyId
-                if (currentTask.meta.hasPlayFunction) {
-                  storyUrl = storyUrl + '&addonPanel=storybook/interactions/panel'
-                }
-                currentError.message = 
-                  '\\n\x1B[34m' + 
-                  'Click to debug the error directly in Storybook: ' + storyUrl + '\x1B[39m' + 
-                  '\\n\\n' + currentError.message
-              }
-            })
-          }
-
-          afterAll(suite => {
-            suite.tasks.forEach(modifyErrorMessage)
-          })
-        `
-        // log('Virtual setup file content:\n', setupFileContent)
-        return setupFileContent
-      }
-    },
     async configureServer() {
       // this might be useful in the future
       if (!finalOptions.configDir) {
@@ -99,11 +59,17 @@ export const storybookTest = (options?: UserOptions): any => {
 
       config.test = config.test ?? {}
 
+      config.define = config.define ?? {}
+      config.define = {
+        ...config.define,
+        'import.meta.env.__STORYBOOK_URL__': JSON.stringify(storybookUrl),
+      }
+
       config.test.setupFiles = config.test.setupFiles ?? []
       if (typeof config.test.setupFiles === 'string') {
         config.test.setupFiles = [config.test.setupFiles]
       }
-      config.test.setupFiles.push(virtualSetupFileId)
+      config.test.setupFiles.push('@storybook/experimental-vitest-plugin/setup')
 
       if (finalOptions.storybookScript && !finalOptions.skipRunningStorybook) {
         config.test.reporters = config.test.reporters ?? ['default']
@@ -116,9 +82,11 @@ export const storybookTest = (options?: UserOptions): any => {
       config.test.server = config.test.server ?? {}
       config.test.server.deps = config.test.server.deps ?? {}
       config.test.server.deps.inline = config.test.server.deps.inline ?? []
-      config.test.server.deps.inline.push(
-        '@storybook/experimental-vitest-plugin'
-      )
+      if (Array.isArray(config.test.server.deps.inline)) {
+        config.test.server.deps.inline.push(
+          '@storybook/experimental-vitest-plugin'
+        )
+      }
 
       log('Final plugin options:', finalOptions)
 
