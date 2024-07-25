@@ -5,10 +5,6 @@ import { setViewport } from './viewports'
 
 type TagsFilter = Required<UserOptions['tags']>
 
-export const shouldSkip = (storyTags: string[], tagsFilter: TagsFilter) => {
-  return tagsFilter?.skip.some((tag) => storyTags.includes(tag))
-}
-
 export const shouldRun = (storyTags: string[], tagsFilter: TagsFilter) => {
   const isIncluded =
     tagsFilter?.include.length === 0 ||
@@ -18,6 +14,13 @@ export const shouldRun = (storyTags: string[], tagsFilter: TagsFilter) => {
   )
 
   return isIncluded && isNotExcluded
+}
+
+export const shouldSkip = (storyTags: string[], tagsFilter: TagsFilter) => {
+  return (
+    !shouldRun(storyTags, tagsFilter) ||
+    tagsFilter?.skip.some((tag) => storyTags.includes(tag))
+  )
 }
 
 export const testStory = (
