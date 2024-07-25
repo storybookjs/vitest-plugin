@@ -1,4 +1,4 @@
-console.log("message from preview file");
-const preview = {};
+console.log('message from preview file')
+const preview = {}
 
-export default preview;
+export default preview
