@@ -31,5 +31,11 @@
     "vite-plugin-inspect": "^0.8.4",
     "vitest": "^2.0.4",
     "webdriverio": "^8.36.1"
+  },
+  "imports": {
+    "#utils": {
+      "storybook": "./src/utils.mock.ts",
+      "default": "./src/utils.ts"
+    }
   }
 }

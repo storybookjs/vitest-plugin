@@ -65,6 +65,10 @@ export const storybookTest = (options?: UserOptions): any => {
         'import.meta.env.__STORYBOOK_URL__': JSON.stringify(storybookUrl),
       }
 
+      config.resolve = config.resolve ?? {}
+      config.resolve.conditions = config.resolve.conditions ?? []
+      config.resolve.conditions.push('storybook', 'stories', 'test')
+
       config.test.setupFiles = config.test.setupFiles ?? []
       if (typeof config.test.setupFiles === 'string') {
         config.test.setupFiles = [config.test.setupFiles]

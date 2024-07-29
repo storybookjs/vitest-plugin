@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { expect, within } from '@storybook/test'
+import { expect, isMockFunction, mocked, within } from '@storybook/test'
+import { foo } from '#utils'
 
 import { Button } from './Button'
 
@@ -45,6 +46,17 @@ export const Secondary: Story = {
 export const Skipped: Story = {
   ...Primary,
   tags: ['!test'],
+}
+
+export const ModuleMocking: Story = {
+  ...Primary,
+  beforeEach: () => {
+    mocked(foo).mockReturnValue('mocked')
+  },
+  async play() {
+    await expect(isMockFunction(foo)).toBe(true)
+    await expect(foo()).toBe('mocked')
+  },
 }
 
 const ResponsiveComponent = () => {
