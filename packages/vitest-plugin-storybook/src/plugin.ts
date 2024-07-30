@@ -1,6 +1,5 @@
 import { join } from 'node:path'
 import type { Plugin } from 'vite'
-import { StorybookReporter } from './storybook-reporter'
 import { transform } from './transformer'
 import type { InternalOptions, UserOptions } from './types'
 import { log } from './utils'
@@ -75,13 +74,13 @@ export const storybookTest = (options?: UserOptions): any => {
       }
       config.test.setupFiles.push('@storybook/experimental-vitest-plugin/setup')
 
-      if (finalOptions.storybookScript && !finalOptions.skipRunningStorybook) {
-        config.test.reporters ??= ['default']
-
-        // Start Storybook CLI in background if not already running
-        // And send story status to Storybook's sidebar
-        config.test.reporters.push(new StorybookReporter(finalOptions))
+      config.test.setupFiles = config.test.setupFiles ?? []
+      if (typeof config.test.setupFiles === 'string') {
+        config.test.setupFiles = [config.test.setupFiles]
       }
+      config.test.setupFiles.push(
+        '@storybook/experimental-vitest-plugin/global-setup'
+      )
 
       config.test.server ??= {}
       config.test.server.deps ??= {}

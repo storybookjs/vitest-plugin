@@ -14,6 +14,7 @@ const modifyErrorMessage = (currentTask: Task) => {
     currentTask.result.errors?.[0]
   ) {
     const currentError = currentTask.result.errors[0]
+    // TODO: seems like import.meta.env is not getting populated
     const storybookUrl =
       import.meta.env.__STORYBOOK_URL__ || process.env.__STORYBOOK_URL__
     let storyUrl = `${storybookUrl}/?path=/story/${meta.storyId}`

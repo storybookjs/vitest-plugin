@@ -16,7 +16,7 @@ export default mergeConfig(
       name: 'storybook',
       include: ['../src/**/*.{story,stories}.?(c|m)[jt]s?(x)'],
       browser: {
-        enabled: true,
+        // enabled: true,
         name: 'chromium',
         provider: 'playwright',
         headless: true,
