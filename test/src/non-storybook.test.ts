@@ -1,8 +1,11 @@
 import { describe, expect, test } from 'vitest'
 
-const delay = async (time = 1000) =>
+const delay = async (time = 100) =>
   await new Promise((r) => setTimeout(r, time))
 
+const runFailures = false
+
+// for misc testing regarding vitest task metadata
 describe('1', () => {
   describe('2', () => {
     test('2.1', ({ task }) => {
@@ -18,7 +21,7 @@ describe('1', () => {
     })
   })
 
-  describe('3', () => {
+  describe.runIf(runFailures)('3', () => {
     test('3.1', ({ task }) => {
       // @ts-ignore
       task.meta.customData = 'customData 3.1'
@@ -26,7 +29,7 @@ describe('1', () => {
     })
   })
 
-  test('4.1', async () => {
+  test.runIf(runFailures)('4.1', async () => {
     await delay()
     expect(1).toBe(2)
   })

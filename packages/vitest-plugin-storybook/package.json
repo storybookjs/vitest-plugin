@@ -21,10 +21,14 @@
       "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     },
-    "./reporter": {
-      "types": "./dist/reporter.d.ts",
-      "require": "./dist/reporter.cjs",
-      "import": "./dist/index.js"
+    "./setup": {
+      "types": "./dist/setup-file.d.ts",
+      "import": "./dist/setup-file.js"
+    },
+    "./dist/test-utils": {
+      "types": "./dist/test-utils.d.ts",
+      "require": "./dist/test-utils.cjs",
+      "import": "./dist/test-utils.js"
     },
     "./package.json": "./package.json"
   },
@@ -47,17 +51,19 @@
     "@testing-library/react": "^15.0.7",
     "@types/node": "^20.12.11",
     "@types/testing-library__jest-dom": "^6.0.0",
+    "@vitest/browser": "^2.0.0",
     "auto": "^11.1.6",
     "jsdom": "^24.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "ts-dedent": "^2.2.0",
     "tsup": "^8.0.1",
     "typescript": "^5.0.0",
     "vite": "^5.0.2",
-    "vitest": "^1.6.0"
+    "vitest": "^2.0.0"
   },
   "peerDependencies": {
-    "vitest": ">=0.29.0"
+    "vitest": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"

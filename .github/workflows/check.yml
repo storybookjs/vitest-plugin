@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: [push]
 
 jobs:
   checks:
@@ -16,7 +12,11 @@ jobs:
           node-version: 18
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
+          run_install: true
       - run: pnpm build
+      - name: Install Playwright
+        working-directory: ./test
+        run: pnpm exec playwright install
       - run: pnpm test
       - run: pnpm check

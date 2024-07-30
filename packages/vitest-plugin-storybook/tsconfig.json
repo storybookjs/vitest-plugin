@@ -23,5 +23,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "typings.d.ts"]
 }

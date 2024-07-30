@@ -132,7 +132,9 @@ export class StorybookReporter implements Reporter {
         const status = stateToStatusMap[taskResult.state]
 
         // task.meta is either in pack[2] or in a task.meta, depending on the timing
-        const meta = (task.meta || pack[2]) as { storyId: string }
+        const meta = (task.meta || pack[2]) as {
+          storyId: string
+        }
 
         // Only update if it's pending or failed, to avoid noise
         this.testStatusData[meta.storyId] = {

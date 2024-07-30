@@ -1,8 +1,15 @@
 import { defineConfig } from 'tsup'
 
-export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm', 'cjs'],
-  clean: true,
-  dts: true,
-})
+export default defineConfig([
+  {
+    entry: ['src/index.ts', 'src/test-utils.ts'],
+    format: ['esm', 'cjs'],
+    clean: true,
+    dts: true,
+  },
+  {
+    entry: ['src/setup-file.ts'],
+    format: 'esm',
+    clean: true,
+  },
+])

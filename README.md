@@ -4,7 +4,7 @@ The Storybook Vitest plugin transforms story files into test files using the por
 
 ## Requirements
 
-This is a Vitest plugin, so you have to have Vitest set up in your project.
+This is a Vitest plugin, so you have to have Vitest set up in your project. It relies on testing-library, so you must also have it set up in your project.
 
 ## Renderer support
 
@@ -20,51 +20,65 @@ Currently this solution supports the following renderers:
 yarn add @storybook/experimental-vitest-plugin
 ```
 
-### 2. Register in your Vitest config file
+### 2. Create a setup file for Storybook
 
-You can choose one of the two possible ways:
-1. In a Vitest config file:
+This plugin is built on top of the [Portable stories](https://storybook.js.org/docs/api/portable-stories) Storybook concept. In order for the stories to be correctly composed by the plugin, you have to create a setup file that configures portable stories. [You can follow the docs](https://storybook.js.org/docs/api/portable-stories/portable-stories-vitest#setprojectannotations) for that. You should create it at `.storybook/setupTests.ts`.
+
+### 3. Create a Vitest config file in your Storybook directory
+
+Define all of the setup to be applied only for the story tests in a `.storybook/vitest.config.ts` file:
+
 ```ts
-// vitest.config.ts
+// .storybook/vitest.config.ts
 import { defineConfig, mergeConfig } from 'vitest/config'
+import viteConfig from '../vite.config'
 import { storybookTest } from '@storybook/experimental-vitest-plugin'
-
-import viteConfig from './vite.config'
 
 export default mergeConfig(
   viteConfig,
   defineConfig({
     plugins: [
-      storybookTest(),
+      storybookTest({
+        renderer: 'react',
+      }),
     ],
     test: {
-      // whatever overrides you like here
+      name: 'storybook',
+      // add the paths to your stories
+      include: ['../src/**/*.{story,stories}.?(c|m)[jt]s?(x)'],
+      // enable browser mode
+      browser: {
+        enabled: true,
+        name: 'chromium',
+        // make sure to install playwright
+        provider: 'playwright',
+        headless: true,
+      },
+      setupFiles: ['./setupTests.ts'],
+      environment: 'happy-dom',
     },
   })
 )
 ```
 
-2. In a Vitest workspace file:
+### 4. Add the newly created vitest config to your vitest workspace file
+
+If you already have a `vitest.workspace.ts` file, just add the `.storybook` path to its list, otherwise create the file like so:
+
 ```ts
 // vitest.workspace.ts
 import { defineWorkspace } from 'vitest/config'
 import { storybookTest } from '@storybook/experimental-vitest-plugin'
 
 export default defineWorkspace([
-  {
-    extends: './vite.config.ts',
-    plugins: [
-      storybookTest(),
-    ],
-    test: {
-      setupFiles: './src/setupTests.node.ts',
-      environment: 'happy-dom',
-    },
-  },
+  // This is the path to your existing vitest config files
+  './vitest.config.ts', 
+  // 👇 Add the path to the storybook config directory
+  './.storybook'
 ])
 ```
 
-### 3. Run your tests
+### 5. Run your tests
 
 That's it, your tests should now include story files. If you are using the Vitest extension for your IDE, it should automatically detect the new tests as well.
 
@@ -75,7 +89,7 @@ The plugin should work out of the box, but there are extra functionalities if yo
 ### `configDir`
 
 - **Type:** `string`
-- **Description:** The directory where the Storybook configuration is located, relative to the Vitest configuration file. If not provided, the plugin will use `.storybook` in the current working directory.
+- **Description:** The directory where the Storybook configuration is located, relative to CWD. If not provided, the plugin will use `.storybook` in the current working directory.
 - **Default:** `.storybook`
 
 ### `storybookScript`
@@ -92,8 +106,8 @@ The plugin should work out of the box, but there are extra functionalities if yo
 
 ### `renderer`
 
-- **Type:** `SupportedRenderers` (optional)
-- **Description:** The renderer used by Storybook. If not provided, it will be inferred from the main config file located in the `configDir`.
+- **Type:** `react | vue | svelte`
+- **Description:** The renderer used by Storybook.
 - **Default:** `undefined`
 
 ### `snapshot`
@@ -108,12 +122,20 @@ The plugin should work out of the box, but there are extra functionalities if yo
 - **Description:** The URL where Storybook is hosted. This is used to provide a link to the story in the test output on failures.
 - **Default:** `http://localhost:6006`
 
+### `tags`
+
+- **Type:** `object`
+- **Description:** Tags to include, exclude, or skip. These tags are defined as annotations in your story or meta.
+  - `include`: `string[]` - Tags to include.
+  - `exclude`: `string[]` - Tags to exclude.
+  - `skip`: `string[]` - Tags to skip.
+
 ## Usage
 
 ```ts
 storybookTest({
   // API options here
-  configDir: '../../.storybook',
+  renderer: 'react',
   storybookScript: 'npm run storybook',
 });
 ```
