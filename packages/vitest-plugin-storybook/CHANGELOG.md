@@ -1,3 +1,15 @@
+# v0.0.3 (Wed Jul 31 2024)
+
+#### ⚠️ Pushed to `main`
+
+- use run function when available ([@yannbf](https://github.com/yannbf))
+
+#### Authors: 1
+
+- Yann Braga ([@yannbf](https://github.com/yannbf))
+
+---
+
 # v0.0.2 (Wed Jul 31 2024)
 
 #### 🐛 Bug Fix
