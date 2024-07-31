@@ -25,6 +25,7 @@
     "test": "pnpm -r test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3"
+    "@biomejs/biome": "^1.8.3",
+    "lefthook": "^1.7.11"
   }
 }

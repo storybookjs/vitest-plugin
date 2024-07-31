@@ -57,35 +57,35 @@ export const storybookTest = (options?: UserOptions): any => {
       //   plugin.name?.startsWith('vitest:browser')
       // )
 
-      config.test = config.test ?? {}
+      config.test ??= {}
 
-      config.define = config.define ?? {}
+      config.define ??= {}
       config.define = {
         ...config.define,
         'import.meta.env.__STORYBOOK_URL__': JSON.stringify(storybookUrl),
       }
 
-      config.resolve = config.resolve ?? {}
-      config.resolve.conditions = config.resolve.conditions ?? []
+      config.resolve ??= {}
+      config.resolve.conditions ??= []
       config.resolve.conditions.push('storybook', 'stories', 'test')
 
-      config.test.setupFiles = config.test.setupFiles ?? []
+      config.test.setupFiles ??= []
       if (typeof config.test.setupFiles === 'string') {
         config.test.setupFiles = [config.test.setupFiles]
       }
       config.test.setupFiles.push('@storybook/experimental-vitest-plugin/setup')
 
       if (finalOptions.storybookScript && !finalOptions.skipRunningStorybook) {
-        config.test.reporters = config.test.reporters ?? ['default']
+        config.test.reporters ??= ['default']
 
         // Start Storybook CLI in background if not already running
         // And send story status to Storybook's sidebar
         config.test.reporters.push(new StorybookReporter(finalOptions))
       }
 
-      config.test.server = config.test.server ?? {}
-      config.test.server.deps = config.test.server.deps ?? {}
-      config.test.server.deps.inline = config.test.server.deps.inline ?? []
+      config.test.server ??= {}
+      config.test.server.deps ??= {}
+      config.test.server.deps.inline ??= []
       if (Array.isArray(config.test.server.deps.inline)) {
         config.test.server.deps.inline.push(
           '@storybook/experimental-vitest-plugin'
