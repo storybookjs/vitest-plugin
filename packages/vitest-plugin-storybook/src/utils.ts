@@ -5,6 +5,9 @@ type RendererSpecificTemplates = {
 }
 
 export const PACKAGES_MAP = {
+  nextjs: {
+    storybookPackage: '@storybook/nextjs',
+  },
   react: {
     storybookPackage: '@storybook/react',
   },

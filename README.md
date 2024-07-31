@@ -106,9 +106,12 @@ The plugin should work out of the box, but there are extra functionalities if yo
 
 ### `renderer`
 
-- **Type:** `react | vue | svelte`
+- **Type:** `react | vue | svelte | nextjs`
 - **Description:** The renderer used by Storybook.
 - **Default:** `undefined`
+
+> [!IMPORTANT]
+> If you are using Next.js, you have to use this plugin in tandem with [vite-plugin-storybook-nextjs](https://github.com/storybookjs/vite-plugin-storybook-nextjs).
 
 ### `snapshot`
 

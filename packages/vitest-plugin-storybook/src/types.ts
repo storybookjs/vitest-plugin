@@ -1,4 +1,4 @@
-export type SupportedRenderers = 'react' | 'vue3' | 'svelte'
+export type SupportedRenderers = 'react' | 'vue3' | 'svelte' | 'nextjs'
 
 export type UserOptions = {
   /**
