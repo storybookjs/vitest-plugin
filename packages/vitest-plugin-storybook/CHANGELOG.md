@@ -1,8 +1,7 @@
-# v0.0.3 (Wed Jul 31 2024)
+# v0.0.2 (Wed Jul 31 2024)
 
 #### 🐛 Bug Fix
 
-- v0.0.1 [#1](https://github.com/storybookjs/vitest-plugin/pull/1) ([@yannbf](https://github.com/yannbf))
 - add support for Storybook module mocking [#3](https://github.com/storybookjs/vitest-plugin/pull/3) ([@yannbf](https://github.com/yannbf))
 - Address review feedback [#2](https://github.com/storybookjs/vitest-plugin/pull/2) ([@yannbf](https://github.com/yannbf))
 
@@ -21,17 +20,6 @@
 - autodetect story files ([@yannbf](https://github.com/yannbf))
 - add storyshots mode ([@yannbf](https://github.com/yannbf))
 - first commit ([@yannbf](https://github.com/yannbf))
-
-#### Authors: 1
-
-- Yann Braga ([@yannbf](https://github.com/yannbf))
-
----
-
-# v0.0.2 (Wed Jul 31 2024)
-
-#### ⚠️ Pushed to `main`
-
 - add nextjs support ([@yannbf](https://github.com/yannbf))
 
 #### Authors: 1
