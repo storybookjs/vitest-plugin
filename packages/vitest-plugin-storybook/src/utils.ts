@@ -21,7 +21,7 @@ export const PACKAGES_MAP = {
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const log = (...args: any) => {
-  if (true || process.env.DEBUG || process.env.DEBUG === 'storybook') {
+  if (process.env.DEBUG || process.env.DEBUG === 'storybook') {
     console.log('🟡 ', ...args)
   }
 }

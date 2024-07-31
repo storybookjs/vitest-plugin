@@ -1,31 +1,32 @@
 import net from 'node:net'
-// @ts-expect-error missing type
-import waitOn from 'wait-on'
 import execa from 'execa'
 import { log } from './utils'
 
-// other code
 import type { GlobalSetupContext } from 'vitest/node'
 
-const options = {
-  storybookPort: 6006,
-  storybookScript: 'yarn storybook',
-}
-
-console.log('GLOBAL SETUP', { waitOn, execa })
+let storybookProcess: execa.ExecaChildProcess | null = null
 
 const startStorybookIfNeeded = async () => {
-  console.log('STARTING STORYBOOK')
-  const { storybookPort: port, storybookScript } = options
+  const storybookScript = process.env.__STORYBOOK_SCRIPT__
+  const storybookUrl = process.env.__STORYBOOK_URL__ || ''
+
+  const url = new URL(storybookUrl)
+  const port = Number.parseInt(url.port, 10)
+
+  if (typeof port !== 'number' || Number.isNaN(port)) {
+    console.warn(
+      `[Storybook] Found an invalid port number "${port}" in storybook url "${storybookUrl}", the plugin will skip running Storybook.\nAre you sure the storybookUrl option is correct?`
+    )
+    return
+  }
 
   await new Promise((resolve, reject) => {
     const server = net.createServer()
-    console.log('INSIDE PROMISE')
 
     server.once('error', (err: NodeJS.ErrnoException) => {
       log('Error when listening to port', port, err)
       if (err.code === 'EADDRINUSE') {
-        log('Storybook is already running')
+        log('Storybook was already running before the tests started')
         resolve(null)
       } else {
         reject(err)
@@ -39,18 +40,10 @@ const startStorybookIfNeeded = async () => {
       log(`Watch mode detected, starting Storybook with command: ${script}`)
 
       try {
-        console.log('EXECUTING SCRIPT')
-        execa.command(script, {
+        storybookProcess = execa.command(script, {
           stdio: 'pipe',
           cwd: process.cwd(),
         })
-
-        log('waiting on Storybook to be ready')
-        console.log('GLOBAL SETUP')
-        await waitOn({
-          resources: ['tcp:localhost:6006'],
-        })
-        log('Storybook is ready!')
 
         resolve(null)
       } catch (error: unknown) {
@@ -66,16 +59,15 @@ const startStorybookIfNeeded = async () => {
   })
 }
 
-export const setup = ({ config }: GlobalSetupContext) => {
-  console.log('SETUP', config.watch)
-
+export const setup = async ({ config }: GlobalSetupContext) => {
   if (config.watch) {
-    startStorybookIfNeeded().then(() => {
-      log('Storybook is ready and resolved')
-    })
+    startStorybookIfNeeded()
   }
 }
 
-export const teardown = () => {
-  console.log('TEARDOWN')
+export const teardown = async () => {
+  if (storybookProcess) {
+    log('Stopping Storybook process')
+    storybookProcess.kill()
+  }
 }
