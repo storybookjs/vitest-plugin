@@ -74,11 +74,11 @@ export const storybookTest = (options?: UserOptions): any => {
       }
       config.test.setupFiles.push('@storybook/experimental-vitest-plugin/setup')
 
-      config.test.setupFiles = config.test.setupFiles ?? []
-      if (typeof config.test.setupFiles === 'string') {
-        config.test.setupFiles = [config.test.setupFiles]
+      config.test.globalSetup = config.test.globalSetup ?? []
+      if (typeof config.test.globalSetup === 'string') {
+        config.test.globalSetup = [config.test.globalSetup]
       }
-      config.test.setupFiles.push(
+      config.test.globalSetup.push(
         '@storybook/experimental-vitest-plugin/global-setup'
       )
 
