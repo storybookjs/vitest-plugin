@@ -41,7 +41,8 @@ export const testStory = (
     _task.meta.storyId = Story.id
     _task.meta.hasPlayFunction = !!Story.play
     await setViewport(Story.parameters.viewport)
-    await Story.play()
+    const runFn = Story.run ?? Story.play
+    await runFn()
   }
 }
 
