@@ -41,6 +41,7 @@ const startStorybookIfNeeded = async () => {
   log(`Starting Storybook with command: ${storybookScript}`)
 
   try {
+    // We do this sync because we don't want Vitest to hang while Storybook is starting
     storybookProcess = spawn(storybookScript, [], {
       stdio: 'ignore',
       cwd: process.cwd(),
