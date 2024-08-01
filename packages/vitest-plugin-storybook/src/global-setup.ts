@@ -1,11 +1,11 @@
-import { spawn } from 'node:child_process'
+import { spawn, type ChildProcess } from 'node:child_process'
 import { log } from './utils'
 import http from 'node:http'
 import https from 'node:https'
 
 import type { GlobalSetupContext } from 'vitest/node'
 
-let storybookProcess: ReturnType<typeof spawn> | null = null
+let storybookProcess: ChildProcess | null = null
 
 const checkStorybookRunning = (storybookUrl: string) => {
   return new Promise<boolean>((resolve) => {
@@ -59,6 +59,14 @@ const startStorybookIfNeeded = async () => {
   }
 }
 
+const killProcess = (process: ChildProcess) => {
+  return new Promise((resolve, reject) => {
+    process.on('close', resolve)
+    process.on('error', reject)
+    process.kill()
+  })
+}
+
 export const setup = async ({ config }: GlobalSetupContext) => {
   if (config.watch) {
     await startStorybookIfNeeded()
@@ -68,6 +76,6 @@ export const setup = async ({ config }: GlobalSetupContext) => {
 export const teardown = async () => {
   if (storybookProcess) {
     log('Stopping Storybook process')
-    storybookProcess.kill()
+    await killProcess(storybookProcess)
   }
 }
