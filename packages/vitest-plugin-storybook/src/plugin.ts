@@ -94,11 +94,11 @@ export const storybookTest = (options?: UserOptions): any => {
       config.test.server ??= {}
       config.test.server.deps ??= {}
       config.test.server.deps.inline ??= []
-      // if (Array.isArray(config.test.server.deps.inline)) {
-      //   config.test.server.deps.inline.push(
-      //     '@storybook/experimental-vitest-plugin/test-utils',
-      //   )
-      // }
+      if (Array.isArray(config.test.server.deps.inline)) {
+        config.test.server.deps.inline.push(
+          '@storybook/experimental-vitest-plugin'
+        )
+      }
 
       log('Final plugin options:', finalOptions)
 
