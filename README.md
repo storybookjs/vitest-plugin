@@ -6,12 +6,8 @@ The Storybook Vitest plugin transforms story files into test files using the por
 
 This is a Vitest plugin, so you have to have Vitest set up in your project. It relies on testing-library, so you must also have it set up in your project.
 
-## Renderer support
-
-Currently this solution supports the following renderers:
-- React
-- Vue3
-- Svelte
+> [!IMPORTANT]
+> If you are using Next.js, you have to use this plugin in tandem with [vite-plugin-storybook-nextjs](https://github.com/storybookjs/vite-plugin-storybook-nextjs).
 
 ## Getting started
 
@@ -39,7 +35,7 @@ export default mergeConfig(
   defineConfig({
     plugins: [
       storybookTest({
-        renderer: 'react',
+        storybookScript: 'yarn storybook',
       }),
     ],
     test: {
@@ -104,15 +100,6 @@ The plugin should work out of the box, but there are extra functionalities if yo
 - **Description:** Whether to skip running Storybook when running tests in watch mode. This option is only relevant when `storybookScript` is provided.
 - **Default:** `false`
 
-### `renderer`
-
-- **Type:** `react | vue | svelte | nextjs`
-- **Description:** The renderer used by Storybook.
-- **Default:** `undefined`
-
-> [!IMPORTANT]
-> If you are using Next.js, you have to use this plugin in tandem with [vite-plugin-storybook-nextjs](https://github.com/storybookjs/vite-plugin-storybook-nextjs).
-
 ### `snapshot`
 
 - **Type:** `boolean`
@@ -137,8 +124,6 @@ The plugin should work out of the box, but there are extra functionalities if yo
 
 ```ts
 storybookTest({
-  // API options here
-  renderer: 'react',
   // Make sure to pass the --ci flag so Storybook won't pop up the browser
   storybookScript: 'npm run storybook -- --ci',
 });

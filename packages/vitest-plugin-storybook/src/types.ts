@@ -1,5 +1,3 @@
-export type SupportedRenderers = 'react' | 'vue3' | 'svelte' | 'nextjs'
-
 export type UserOptions = {
   /**
    *  The directory where the Storybook configuration is located, relative to the vitest configuration file.
@@ -19,11 +17,6 @@ export type UserOptions = {
    *  @default false
    */
   skipRunningStorybook?: boolean
-  /**
-   *  The renderer used by Storybook. If not provided, it will be inferred from the main config file located in the `configDir`.
-   *  @default undefined
-   */
-  renderer?: SupportedRenderers
   /**
    *  Whether to generate DOM snapshots for every story file.
    *  @default false

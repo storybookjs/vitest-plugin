@@ -2,7 +2,6 @@ import MagicString from 'magic-string'
 import typescript from 'typescript'
 import dedent from 'ts-dedent'
 import type { InternalOptions } from './types'
-import { PACKAGES_MAP } from './utils'
 
 // Main transform function for the Vitest plugin
 export async function transform({
@@ -143,12 +142,11 @@ export async function transform({
 
   typescript.forEachChild(sourceFile, modifyStories)
 
-  const metadata = PACKAGES_MAP[options.renderer]
   // Add necessary imports to the transformed file
   s.append(
     dedent`\n
       import { test as __test } from 'vitest';
-      import { composeStories as __composeStories } from '${metadata.storybookPackage}';
+      import { composeStories as __composeStories } from 'storybook/internal/preview-api';
       import { testStory as __testStory } from '@storybook/experimental-vitest-plugin/dist/test-utils';
     `
   )

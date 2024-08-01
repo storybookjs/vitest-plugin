@@ -11,7 +11,6 @@ const require = createRequire(import.meta.url)
 
 const defaultOptions: UserOptions = {
   storybookScript: undefined,
-  renderer: undefined,
   configDir: undefined,
   storybookUrl: 'http://localhost:6006',
   snapshot: false,

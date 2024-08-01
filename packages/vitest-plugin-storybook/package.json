@@ -54,7 +54,8 @@
     "vitest": "^2.0.0"
   },
   "peerDependencies": {
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "storybook": "^8.2.0"
   },
   "publishConfig": {
     "access": "public"
