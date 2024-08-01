@@ -9,6 +9,7 @@ export default mergeConfig(
     plugins: [
       storybookTest({
         renderer: 'react',
+        storybookScript: 'pnpm run storybook',
       }),
       Inspect({ build: true, outputDir: '.vite-inspect' }),
     ],

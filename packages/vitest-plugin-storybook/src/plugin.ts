@@ -3,8 +3,11 @@ import type { Plugin } from 'vite'
 import { transform } from './transformer'
 import type { InternalOptions, UserOptions } from './types'
 import { log } from './utils'
+import { createRequire } from 'node:module'
 
 const DEFAULT_CONFIG_DIR = '.storybook'
+
+const require = createRequire(import.meta.url)
 
 const defaultOptions: UserOptions = {
   storybookScript: undefined,
@@ -77,7 +80,7 @@ export const storybookTest = (options?: UserOptions): any => {
       if (typeof config.test.setupFiles === 'string') {
         config.test.setupFiles = [config.test.setupFiles]
       }
-      config.test.setupFiles.push('@storybook/experimental-vitest-plugin/setup')
+      config.test.setupFiles.push(require.resolve('./setup-file.js'))
 
       // when a Storybook script is provided, we spawn Storybook for the user when in watch mode
       if (finalOptions.storybookScript) {
@@ -85,19 +88,17 @@ export const storybookTest = (options?: UserOptions): any => {
         if (typeof config.test.globalSetup === 'string') {
           config.test.globalSetup = [config.test.globalSetup]
         }
-        config.test.globalSetup.push(
-          '@storybook/experimental-vitest-plugin/global-setup'
-        )
+        config.test.globalSetup.push(require.resolve('./global-setup.js'))
       }
 
       config.test.server ??= {}
       config.test.server.deps ??= {}
       config.test.server.deps.inline ??= []
-      if (Array.isArray(config.test.server.deps.inline)) {
-        config.test.server.deps.inline.push(
-          '@storybook/experimental-vitest-plugin'
-        )
-      }
+      // if (Array.isArray(config.test.server.deps.inline)) {
+      //   config.test.server.deps.inline.push(
+      //     '@storybook/experimental-vitest-plugin/test-utils',
+      //   )
+      // }
 
       log('Final plugin options:', finalOptions)
 

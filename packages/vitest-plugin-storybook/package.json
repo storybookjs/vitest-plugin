@@ -17,33 +17,21 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "node": "./dist/index.cjs",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
-    },
-    "./setup": {
-      "types": "./dist/setup-file.d.ts",
-      "import": "./dist/setup-file.js"
-    },
-    "./global-setup": {
-      "types": "./dist/global-setup.d.ts",
-      "import": "./dist/global-setup.js"
     },
     "./dist/test-utils": {
       "types": "./dist/test-utils.d.ts",
-      "require": "./dist/test-utils.cjs",
       "import": "./dist/test-utils.js"
     },
     "./package.json": "./package.json"
   },
   "files": ["dist"],
   "scripts": {
-    "build": "rimraf ./dist && tsup",
+    "build": "tsup",
     "check": "tsc --noEmit",
     "release": "auto shipit"
   },
   "dependencies": {
-    "execa": "^5.0.0",
     "magic-string": "^0.30.10",
     "typescript": "^5.0.0"
   },
@@ -56,10 +44,10 @@
     "@types/testing-library__jest-dom": "^6.0.0",
     "@vitest/browser": "^2.0.0",
     "auto": "^11.1.6",
+    "execa": "^9.3.0",
     "jsdom": "^24.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "rimraf": "^6.0.1",
     "ts-dedent": "^2.2.0",
     "tsup": "^8.0.1",
     "typescript": "^5.0.0",

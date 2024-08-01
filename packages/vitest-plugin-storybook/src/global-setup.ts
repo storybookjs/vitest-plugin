@@ -1,67 +1,66 @@
-import net from 'node:net'
-import execa from 'execa'
+import { spawn } from 'node:child_process'
 import { log } from './utils'
+import http from 'node:http'
+import https from 'node:https'
 
 import type { GlobalSetupContext } from 'vitest/node'
 
-let storybookProcess: execa.ExecaChildProcess | null = null
+let storybookProcess: ReturnType<typeof spawn> | null = null
+
+const checkStorybookRunning = (storybookUrl: string) => {
+  return new Promise<boolean>((resolve) => {
+    const url = new URL(`${storybookUrl}/iframe.html`)
+    const protocol = url.protocol === 'https:' ? https : http
+
+    const options = {
+      method: 'HEAD',
+      host: url.hostname,
+      path: url.pathname,
+    }
+
+    const req = protocol.request(options, (res) => {
+      resolve(res.statusCode === 200)
+    })
+
+    req.on('error', () => resolve(false))
+    req.end()
+  })
+}
 
 const startStorybookIfNeeded = async () => {
-  const storybookScript = process.env.__STORYBOOK_SCRIPT__
+  const storybookScript = process.env.__STORYBOOK_SCRIPT__ || ''
   const storybookUrl = process.env.__STORYBOOK_URL__ || ''
 
-  const url = new URL(storybookUrl)
-  const port = Number.parseInt(url.port, 10)
+  const isRunning = await checkStorybookRunning(storybookUrl)
 
-  if (typeof port !== 'number' || Number.isNaN(port)) {
-    console.warn(
-      `[Storybook] Found an invalid port number "${port}" in storybook url "${storybookUrl}", the plugin will skip running Storybook.\nAre you sure the storybookUrl option is correct?`
-    )
+  if (isRunning) {
+    log('Storybook is already running')
     return
   }
 
-  await new Promise((resolve, reject) => {
-    const server = net.createServer()
+  log(`Starting Storybook with command: ${storybookScript}`)
 
-    server.once('error', (err: NodeJS.ErrnoException) => {
-      log('Error when listening to port', port, err)
-      if (err.code === 'EADDRINUSE') {
-        log('Storybook was already running before the tests started')
-        resolve(null)
-      } else {
-        reject(err)
-      }
+  try {
+    storybookProcess = spawn(storybookScript, [], {
+      stdio: 'ignore',
+      cwd: process.cwd(),
+      shell: true,
     })
 
-    server.once('listening', async () => {
-      server.close()
-
-      const script = `${storybookScript} --ci`
-      log(`Watch mode detected, starting Storybook with command: ${script}`)
-
-      try {
-        storybookProcess = execa.command(script, {
-          stdio: 'pipe',
-          cwd: process.cwd(),
-        })
-
-        resolve(null)
-      } catch (error: unknown) {
-        log('Failed to start Storybook:', error)
-        if ((error as { code: string }).code !== 'EADDRINUSE') {
-          throw error
-        }
-        resolve(null)
-      }
+    storybookProcess.on('error', (error) => {
+      log('Failed to start Storybook:', error)
+      console.log({ error })
+      throw error
     })
-
-    server.listen(port)
-  })
+  } catch (error: unknown) {
+    log('Failed to start Storybook:', error)
+    throw error
+  }
 }
 
 export const setup = async ({ config }: GlobalSetupContext) => {
   if (config.watch) {
-    startStorybookIfNeeded()
+    await startStorybookIfNeeded()
   }
 }
 
