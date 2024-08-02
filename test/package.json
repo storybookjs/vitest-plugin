@@ -1,6 +1,7 @@
 {
   "name": "test-example",
   "private": true,
+  "type": "module",
   "scripts": {
     "inspect": "serve .vite-inspect",
     "storybook": "storybook dev --port 6006",

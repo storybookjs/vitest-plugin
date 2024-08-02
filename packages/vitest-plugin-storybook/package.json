@@ -17,17 +17,10 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "node": "./dist/index.cjs",
-      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
-    },
-    "./setup": {
-      "types": "./dist/setup-file.d.ts",
-      "import": "./dist/setup-file.js"
     },
     "./dist/test-utils": {
       "types": "./dist/test-utils.d.ts",
-      "require": "./dist/test-utils.cjs",
       "import": "./dist/test-utils.js"
     },
     "./package.json": "./package.json"
@@ -39,10 +32,8 @@
     "release": "auto shipit"
   },
   "dependencies": {
-    "execa": "^5.0.0",
     "magic-string": "^0.30.10",
-    "typescript": "^5.0.0",
-    "wait-on": "^7.2.0"
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
     "@storybook/react": "^8.1.0",

@@ -14,8 +14,7 @@ const modifyErrorMessage = (currentTask: Task) => {
     currentTask.result.errors?.[0]
   ) {
     const currentError = currentTask.result.errors[0]
-    const storybookUrl =
-      import.meta.env.__STORYBOOK_URL__ || process.env.__STORYBOOK_URL__
+    const storybookUrl = import.meta.env.__STORYBOOK_URL__
     let storyUrl = `${storybookUrl}/?path=/story/${meta.storyId}`
     if (meta.hasPlayFunction) {
       storyUrl = `${storyUrl}&addonPanel=storybook/interactions/panel`

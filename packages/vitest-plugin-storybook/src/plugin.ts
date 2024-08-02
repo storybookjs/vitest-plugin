@@ -1,11 +1,13 @@
 import { join } from 'node:path'
 import type { Plugin } from 'vite'
-import { StorybookReporter } from './storybook-reporter'
 import { transform } from './transformer'
 import type { InternalOptions, UserOptions } from './types'
 import { log } from './utils'
+import { createRequire } from 'node:module'
 
 const DEFAULT_CONFIG_DIR = '.storybook'
+
+const require = createRequire(import.meta.url)
 
 const defaultOptions: UserOptions = {
   storybookScript: undefined,
@@ -38,6 +40,10 @@ export const storybookTest = (options?: UserOptions): any => {
 
   const storybookUrl = finalOptions.storybookUrl || defaultOptions.storybookUrl
 
+  // To be accessed by the global setup file
+  process.env.__STORYBOOK_URL__ = storybookUrl
+  process.env.__STORYBOOK_SCRIPT__ = finalOptions.storybookScript
+
   return {
     name: 'vite-plugin-storybook-test',
     enforce: 'pre' as const,
@@ -59,10 +65,11 @@ export const storybookTest = (options?: UserOptions): any => {
 
       config.test ??= {}
 
-      config.define ??= {}
-      config.define = {
-        ...config.define,
-        'import.meta.env.__STORYBOOK_URL__': JSON.stringify(storybookUrl),
+      config.test.env ??= {}
+      config.test.env = {
+        ...config.test.env,
+        // To be accessed by the setup file
+        __STORYBOOK_URL__: storybookUrl,
       }
 
       config.resolve ??= {}
@@ -73,14 +80,15 @@ export const storybookTest = (options?: UserOptions): any => {
       if (typeof config.test.setupFiles === 'string') {
         config.test.setupFiles = [config.test.setupFiles]
       }
-      config.test.setupFiles.push('@storybook/experimental-vitest-plugin/setup')
+      config.test.setupFiles.push(require.resolve('./setup-file.js'))
 
-      if (finalOptions.storybookScript && !finalOptions.skipRunningStorybook) {
-        config.test.reporters ??= ['default']
-
-        // Start Storybook CLI in background if not already running
-        // And send story status to Storybook's sidebar
-        config.test.reporters.push(new StorybookReporter(finalOptions))
+      // when a Storybook script is provided, we spawn Storybook for the user when in watch mode
+      if (finalOptions.storybookScript) {
+        config.test.globalSetup = config.test.globalSetup ?? []
+        if (typeof config.test.globalSetup === 'string') {
+          config.test.globalSetup = [config.test.globalSetup]
+        }
+        config.test.globalSetup.push(require.resolve('./global-setup.js'))
       }
 
       config.test.server ??= {}

@@ -122,7 +122,7 @@ The plugin should work out of the box, but there are extra functionalities if yo
 ### `storybookUrl`
 
 - **Type:** `string`
-- **Description:** The URL where Storybook is hosted. This is used to provide a link to the story in the test output on failures.
+- **Description:** The URL where Storybook is hosted. This is used for internal checks and to provide a link to the story in the test output on failures.
 - **Default:** `http://localhost:6006`
 
 ### `tags`
@@ -139,6 +139,7 @@ The plugin should work out of the box, but there are extra functionalities if yo
 storybookTest({
   // API options here
   renderer: 'react',
-  storybookScript: 'npm run storybook',
+  // Make sure to pass the --ci flag so Storybook won't pop up the browser
+  storybookScript: 'npm run storybook -- --ci',
 });
 ```
