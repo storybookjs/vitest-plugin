@@ -1,35 +1,26 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { log } from './utils'
-import http from 'node:http'
-import https from 'node:https'
 
 import type { GlobalSetupContext } from 'vitest/node'
 
 let storybookProcess: ChildProcess | null = null
 
-const checkStorybookRunning = (storybookUrl: string) => {
-  return new Promise<boolean>((resolve) => {
-    const url = new URL(`${storybookUrl}/iframe.html`)
-    const protocol = url.protocol === 'https:' ? https : http
-
-    const options = {
+const checkStorybookRunning = async (
+  storybookUrl: string
+): Promise<boolean> => {
+  try {
+    const response = await fetch(`${storybookUrl}/iframe.html`, {
       method: 'HEAD',
-      host: url.hostname,
-      path: url.pathname,
-    }
-
-    const req = protocol.request(options, (res) => {
-      resolve(res.statusCode === 200)
     })
-
-    req.on('error', () => resolve(false))
-    req.end()
-  })
+    return response.ok
+  } catch {
+    return false
+  }
 }
 
-const startStorybookIfNeeded = async () => {
-  const storybookScript = process.env.__STORYBOOK_SCRIPT__ || ''
-  const storybookUrl = process.env.__STORYBOOK_URL__ || ''
+const startStorybookIfNotRunning = async () => {
+  const storybookScript = process.env.__STORYBOOK_SCRIPT__ as string
+  const storybookUrl = process.env.__STORYBOOK_URL__ as string
 
   const isRunning = await checkStorybookRunning(storybookUrl)
 
@@ -41,16 +32,15 @@ const startStorybookIfNeeded = async () => {
   log(`Starting Storybook with command: ${storybookScript}`)
 
   try {
-    // We do this sync because we don't want Vitest to hang while Storybook is starting
+    // We don't await the process because we don't want Vitest to hang while Storybook is starting
     storybookProcess = spawn(storybookScript, [], {
-      stdio: 'ignore',
+      stdio: process.env.DEBUG === 'storybook' ? 'pipe' : 'ignore',
       cwd: process.cwd(),
       shell: true,
     })
 
     storybookProcess.on('error', (error) => {
       log('Failed to start Storybook:', error)
-      console.log({ error })
       throw error
     })
   } catch (error: unknown) {
@@ -69,7 +59,7 @@ const killProcess = (process: ChildProcess) => {
 
 export const setup = async ({ config }: GlobalSetupContext) => {
   if (config.watch) {
-    await startStorybookIfNeeded()
+    await startStorybookIfNotRunning()
   }
 }
 
