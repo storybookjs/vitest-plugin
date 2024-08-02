@@ -1,3 +1,15 @@
+# v0.0.4 (Fri Aug 02 2024)
+
+#### 🐛 Bug Fix
+
+- Remove reporters in favor of global setup [#4](https://github.com/storybookjs/vitest-plugin/pull/4) ([@yannbf](https://github.com/yannbf))
+
+#### Authors: 1
+
+- Yann Braga ([@yannbf](https://github.com/yannbf))
+
+---
+
 # v0.0.3 (Wed Jul 31 2024)
 
 #### ⚠️ Pushed to `main`
