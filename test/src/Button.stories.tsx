@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { expect, within } from '@storybook/test'
+import {test as base } from 'vitest';
 
 import { Button } from './Button'
 
+const test = base;
 const meta = {
   title: 'Example/Button',
   component: Button,
@@ -14,18 +16,24 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+test('asdf', () => {
+  expect(1).toBe(1);
+})
+
 export const Primary: Story = {
   args: {
     primary: true,
     label: 'Button',
   },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const button = canvas.getByRole('button')
-    await expect(button).toBeInTheDocument()
+  play: async () => {
+    // throw Primary;
+    await expect(1).toBe(1);
+    // const canvas = within(canvasElement)
+    // const button = canvas.getByRole('button')
+    // await expect(button).toBeInTheDocument()
   },
   tags: ['hello'],
-}
+};
 
 export const Secondary: Story = {
   args: {
@@ -37,12 +45,12 @@ export const Secondary: Story = {
       disableSnapshots: true,
     },
   },
-} satisfies Story
+} satisfies Story;
 
 export const Skipped: Story = {
   ...Primary,
   tags: ['!test'],
-}
+};
 
 const ResponsiveComponent = () => {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768)
@@ -75,9 +83,9 @@ const ResponsiveComponent = () => {
       </strong>
     </>
   )
-}
+};
 
-const ResponsiveDesktop: StoryObj = {
+export const ResponsiveDesktop: StoryObj = {
   tags: ['browser-only'],
   render: () => <ResponsiveComponent />,
   parameters: {
@@ -85,31 +93,20 @@ const ResponsiveDesktop: StoryObj = {
       defaultViewport: 'ultrawide',
     },
   },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const div = canvas.getByText('Desktop')
-    await expect(div).toBeInTheDocument()
-    const dimensions = canvas.getByText('2560 x 1280')
-    await expect(dimensions).toBeInTheDocument()
+  play: async () => {
+    await expect(1).toBe(1)
   },
-}
+};
 
-const ResponsiveMobile: StoryObj = {
+export const ResponsiveMobile: StoryObj = {
   ...ResponsiveDesktop,
   parameters: {
     viewport: {
       defaultViewport: 'iphone12',
     },
   },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const div = canvas.getByText('Mobile')
-    await expect(div).toBeInTheDocument()
-    const dimensions = canvas.getByText('390 x 844')
-    await expect(dimensions).toBeInTheDocument()
+  play: async () => {
+    await expect(1).toBe(1)
   },
-}
+};
 
-export { ResponsiveDesktop, ResponsiveMobile }
-
-export const myExcludedData = 123

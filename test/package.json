@@ -4,7 +4,7 @@
   "scripts": {
     "inspect": "serve .vite-inspect",
     "storybook": "storybook dev --port 6006",
-    "test": "vitest --reporter=verbose",
+    "test": "vitest run --reporter=verbose",
     "test:ui": "vitest --ui",
     "test:watch": "vitest dev"
   },

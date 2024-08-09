@@ -43,7 +43,12 @@
     "execa": "^5.0.0",
     "magic-string": "^0.30.10",
     "typescript": "^5.0.0",
-    "wait-on": "^7.2.0"
+    "wait-on": "^7.2.0",
+    "@babel/core": "^7.24.9",
+    "@babel/generator": "^7.24.10",
+    "@babel/parser": "^7.24.8",
+    "@babel/traverse": "^7.24.8",
+    "@babel/types": "^7.24.9"
   },
   "devDependencies": {
     "@storybook/react": "^8.1.0",

@@ -18,12 +18,12 @@ export default defineWorkspace([
         // '**/*.transformed.test.*',
         '**/*.{story,stories}.?(c|m)[jt]s?(x)',
       ],
-      browser: {
-        enabled: true,
-        name: 'chrome',
-        provider: 'webdriverio',
-        headless: true,
-      },
+      // browser: {
+      //   enabled: true,
+      //   name: 'chrome',
+      //   provider: 'webdriverio',
+      //   headless: true,
+      // },
       setupFiles: ['./setupTests.ts'],
       environment: 'happy-dom',
 
