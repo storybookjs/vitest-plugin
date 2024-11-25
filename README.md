@@ -1,3 +1,7 @@
+## ⚠️ Attention!
+
+This plugin is now integrated into Storybook Test addon. Please use it instead, and [refer to the docs here](https://storybook.js.org/docs/writing-tests/test-addon).
+
 # Storybook Vitest Plugin
 
 The Storybook Vitest plugin transforms story files into test files using the portable stories API, providing a seamless integration with Vitest.
